@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Vehicle Management System — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0C0E10;--surface:#141618;--surface2:#1C1F22;--border:rgba(255,255,255,0.08);--text:#F0F0F0;--muted:#9CA3AF;--dim:#4B5563;--cyan:#06B6D4;--cyan-dim:rgba(6,182,212,0.1);--green:#10B981;--green-dim:rgba(16,185,129,0.1);--amber:#F59E0B;--amber-dim:rgba(245,158,11,0.1);--red:#EF4444;--red-dim:rgba(239,68,68,0.1);--blue:#3B82F6;--blue-dim:rgba(59,130,246,0.1);--radius:10px;--radius-sm:6px}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+.topbar{background:rgba(20,22,24,0.95);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:52px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.topbar-logo{font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;color:var(--cyan)}
+.demo-badge{background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.3);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:var(--cyan)}
+.back-link{color:var(--muted);text-decoration:none;font-size:13px}.back-link:hover{color:var(--cyan)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.app-shell{display:flex;height:calc(100vh - 52px)}
+.sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto}
+.sidebar-section{padding:8px 0}
+.sidebar-label{font-size:10px;font-weight:600;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;padding:0 14px 6px;font-family:'JetBrains Mono',monospace}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all 0.15s;border-left:2px solid transparent}
+.nav-item:hover{background:var(--cyan-dim);color:var(--cyan)}.nav-item.active{background:var(--cyan-dim);color:var(--cyan);border-left-color:var(--cyan)}
+.main{flex:1;overflow-y:auto;padding:1.5rem}
+.panel{display:none}.panel.active{display:block}
+.page-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:2px}
+.page-sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:1.25rem}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.25rem}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat.cyan::before{background:var(--cyan)}.stat.green::before{background:var(--green)}.stat.amber::before{background:var(--amber)}.stat.red::before{background:var(--red)}.stat.blue::before{background:var(--blue)}
+.stat-l{font-size:10px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.stat-v{font-size:22px;font-weight:700;color:#fff;line-height:1;margin-bottom:3px}
+.stat-s{font-size:11px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:13px;color:#fff}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;color:var(--text)}
+tr:last-child td{border-bottom:none}tr:hover td{background:rgba(6,182,212,0.03)}
+code{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)}
+.badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-green{background:var(--green-dim);color:var(--green)}.badge-amber{background:var(--amber-dim);color:var(--amber)}.badge-red{background:var(--red-dim);color:var(--red)}.badge-cyan{background:var(--cyan-dim);color:var(--cyan)}.badge-blue{background:var(--blue-dim);color:var(--blue)}
+.btn{padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--cyan);color:#000;font-weight:600}.btn-primary:hover{background:#22D3EE}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-sm{padding:4px 10px;font-size:12px}.btn-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.3)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:500;color:var(--dim)}
+input,select,textarea{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color 0.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan)}select option{background:#141618}
+.vehicle-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;margin-bottom:10px;transition:border-color 0.15s}
+.vehicle-card:hover{border-color:rgba(6,182,212,0.3)}
+.vehicle-icon{font-size:2rem;width:50px;height:50px;background:var(--surface2);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center}
+.vehicle-reg{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:#fff;letter-spacing:0.08em}
+.vehicle-name{font-size:13px;color:var(--muted);margin-top:2px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);color:var(--text);border:1px solid var(--cyan);padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:1000;transform:translateY(60px);opacity:0;transition:all 0.3s;font-family:'JetBrains Mono',monospace}
+.toast.show{transform:translateY(0);opacity:1}
+.service-alert{background:var(--amber-dim);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--amber)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">🚗 Vehicle Management System<span class="demo-badge">DEMO</span></div>
+  <div class="topbar-right"><a href="../index.html" class="back-link">← Portfolio</a></div>
+</div>
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <div class="nav-item active" onclick="showPanel('dashboard')">🏠 Dashboard</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Fleet</div>
+      <div class="nav-item" onclick="showPanel('vehicles')">🚗 All Vehicles</div>
+      <div class="nav-item" onclick="showPanel('add-vehicle')">➕ Register Vehicle</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Owners</div>
+      <div class="nav-item" onclick="showPanel('owners')">👤 Owner Records</div>
+      <div class="nav-item" onclick="showPanel('add-owner')">➕ Add Owner</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Maintenance</div>
+      <div class="nav-item" onclick="showPanel('service')">🔧 Service Schedule</div>
+      <div class="nav-item" onclick="showPanel('log-service')">📝 Log Service</div>
+      <div class="nav-item" onclick="showPanel('history')">📋 Service History</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Compliance</div>
+      <div class="nav-item" onclick="showPanel('insurance')">🛡️ Insurance & Docs</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Reports</div>
+      <div class="nav-item" onclick="showPanel('reports')">📊 Reports</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-title">Fleet Dashboard</div>
+      <div class="page-sub">// vehicle management & maintenance tracking</div>
+      <div id="dash-alerts"></div>
+      <div class="stats-row">
+        <div class="stat cyan"><div class="stat-l">Total Vehicles</div><div class="stat-v" id="d-total">0</div><div class="stat-s">In fleet</div></div>
+        <div class="stat green"><div class="stat-l">Active</div><div class="stat-v" id="d-active">0</div><div class="stat-s">Operational</div></div>
+        <div class="stat amber"><div class="stat-l">In Service</div><div class="stat-v" id="d-service">0</div><div class="stat-s">Under maintenance</div></div>
+        <div class="stat red"><div class="stat-l">Overdue Service</div><div class="stat-v" id="d-overdue">0</div><div class="stat-s">Needs attention</div></div>
+        <div class="stat blue"><div class="stat-l">Owners</div><div class="stat-v" id="d-owners">0</div><div class="stat-s">Registered</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">🔧 Upcoming Service Due</div>
+        <table><thead><tr><th>Reg. No.</th><th>Vehicle</th><th>Service Type</th><th>Due Date</th><th>Owner</th><th>Status</th></tr></thead>
+        <tbody id="dash-service-due"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-hdr">Recent Fleet Activity</div>
+        <table><thead><tr><th>Date</th><th>Vehicle</th><th>Action</th><th>Details</th></tr></thead>
+        <tbody id="dash-activity"></tbody></table>
+      </div>
+    </div>
+
+    <!-- VEHICLES -->
+    <div class="panel" id="panel-vehicles">
+      <div class="page-title">Fleet Registry</div>
+      <div class="page-sub">// all registered vehicles</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+        <input id="veh-search" style="flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--surface2);color:var(--text);outline:none" placeholder="Search reg, make or owner…" oninput="renderVehicles()"/>
+        <select id="veh-status-f" onchange="renderVehicles()" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--surface2);color:var(--text)"><option value="">All Status</option><option>Active</option><option>In Service</option><option>Decommissioned</option></select>
+        <button class="btn btn-primary" onclick="showPanel('add-vehicle')">+ Register</button>
+      </div>
+      <div id="vehicles-grid"></div>
+    </div>
+
+    <!-- ADD VEHICLE -->
+    <div class="panel" id="panel-add-vehicle">
+      <div class="page-title">Register Vehicle</div>
+      <div class="page-sub">// add vehicle to fleet</div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>Registration No. *</label><input id="av-reg" placeholder="e.g. KDA 123A" style="text-transform:uppercase"/></div>
+          <div class="form-group"><label>Owner *</label><select id="av-owner"></select></div>
+          <div class="form-group"><label>Make *</label><input id="av-make" placeholder="e.g. Toyota"/></div>
+          <div class="form-group"><label>Model *</label><input id="av-model" placeholder="e.g. Land Cruiser"/></div>
+          <div class="form-group"><label>Year *</label><input type="number" id="av-year" placeholder="e.g. 2020"/></div>
+          <div class="form-group"><label>Type</label>
+            <select id="av-type"><option>Saloon</option><option>SUV</option><option>Pickup</option><option>Van</option><option>Truck</option><option>Bus</option><option>Motorcycle</option></select>
+          </div>
+          <div class="form-group"><label>Engine CC</label><input type="number" id="av-engine" placeholder="e.g. 2400"/></div>
+          <div class="form-group"><label>Fuel Type</label>
+            <select id="av-fuel"><option>Petrol</option><option>Diesel</option><option>Electric</option><option>Hybrid</option></select>
+          </div>
+          <div class="form-group"><label>Colour</label><input id="av-colour" placeholder="e.g. Pearl White"/></div>
+          <div class="form-group"><label>Current Mileage (km)</label><input type="number" id="av-mileage" placeholder="e.g. 45000"/></div>
+          <div class="form-group"><label>Insurance Expiry</label><input type="date" id="av-insexp"/></div>
+          <div class="form-group"><label>Inspection Due</label><input type="date" id="av-ntsa"/></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="showPanel('vehicles')">Cancel</button>
+          <button class="btn btn-primary" onclick="addVehicle()">✓ Register Vehicle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- OWNERS -->
+    <div class="panel" id="panel-owners">
+      <div class="page-title">Owner Records</div>
+      <div class="page-sub">// registered vehicle owners</div>
+      <div class="card">
+        <table><thead><tr><th>Owner ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Vehicles</th><th>Status</th></tr></thead>
+        <tbody id="owners-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ADD OWNER -->
+    <div class="panel" id="panel-add-owner">
+      <div class="page-title">Add Owner</div>
+      <div class="page-sub">// register a new vehicle owner</div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>Full Name *</label><input id="ao-name" placeholder="e.g. James Mwangi"/></div>
+          <div class="form-group"><label>National ID *</label><input id="ao-id" placeholder="e.g. 23456781"/></div>
+          <div class="form-group"><label>Phone *</label><input id="ao-phone" placeholder="e.g. 0712001001"/></div>
+          <div class="form-group"><label>Email</label><input id="ao-email" placeholder="e.g. james@email.com"/></div>
+          <div class="form-group"><label>Address</label><input id="ao-addr" placeholder="e.g. Westlands, Nairobi"/></div>
+          <div class="form-group"><label>Owner Type</label><select id="ao-type"><option>Individual</option><option>Company</option><option>Government</option></select></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="showPanel('owners')">Cancel</button>
+          <button class="btn btn-primary" onclick="addOwner()">✓ Add Owner</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICE SCHEDULE -->
+    <div class="panel" id="panel-service">
+      <div class="page-title">Service Schedule</div>
+      <div class="page-sub">// upcoming and overdue maintenance</div>
+      <div class="card">
+        <table><thead><tr><th>Vehicle</th><th>Service Type</th><th>Due Date</th><th>Interval</th><th>Last Done</th><th>Status</th><th></th></tr></thead>
+        <tbody id="service-sched-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- LOG SERVICE -->
+    <div class="panel" id="panel-log-service">
+      <div class="page-title">Log Service Record</div>
+      <div class="page-sub">// record a completed maintenance activity</div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>Vehicle *</label><select id="ls-vehicle"></select></div>
+          <div class="form-group"><label>Service Type *</label>
+            <select id="ls-type"><option>Oil Change</option><option>Full Service</option><option>Brake Service</option><option>Tyre Rotation</option><option>Tyre Replacement</option><option>Battery Replacement</option><option>Air Filter</option><option>Transmission Service</option><option>Body Repair</option><option>Electrical</option><option>Other</option></select>
+          </div>
+          <div class="form-group"><label>Service Date *</label><input type="date" id="ls-date"/></div>
+          <div class="form-group"><label>Garage / Provider</label><input id="ls-garage" placeholder="e.g. Toyota Kenya Service"/></div>
+          <div class="form-group"><label>Mileage at Service (km)</label><input type="number" id="ls-mileage" placeholder="e.g. 48500"/></div>
+          <div class="form-group"><label>Cost (KES)</label><input type="number" id="ls-cost" placeholder="e.g. 12000"/></div>
+          <div class="form-group"><label>Next Service Date</label><input type="date" id="ls-next"/></div>
+          <div class="form-group"><label>Next Service Mileage (km)</label><input type="number" id="ls-next-mileage" placeholder="e.g. 53500"/></div>
+          <div class="form-group full"><label>Notes / Parts Replaced</label><textarea id="ls-notes" style="min-height:70px" placeholder="e.g. Replaced oil filter, spark plugs, air filter…"></textarea></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="showPanel('history')">Cancel</button>
+          <button class="btn btn-primary" onclick="logService()">✓ Log Service</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICE HISTORY -->
+    <div class="panel" id="panel-history">
+      <div class="page-title">Service History</div>
+      <div class="page-sub">// complete maintenance records</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem">
+        <select id="hist-veh" onchange="renderHistory()" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--surface2);color:var(--text)"><option value="">All Vehicles</option></select>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Date</th><th>Vehicle</th><th>Service Type</th><th>Mileage</th><th>Garage</th><th>Cost (KES)</th><th>Next Due</th></tr></thead>
+        <tbody id="history-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- INSURANCE -->
+    <div class="panel" id="panel-insurance">
+      <div class="page-title">Insurance & Compliance</div>
+      <div class="page-sub">// document expiry tracking</div>
+      <div class="card">
+        <table><thead><tr><th>Reg. No.</th><th>Vehicle</th><th>Insurance Expiry</th><th>Inspection Due</th><th>Insurance Status</th><th>Inspection Status</th></tr></thead>
+        <tbody id="insurance-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="panel" id="panel-reports">
+      <div class="page-title">Fleet Reports</div>
+      <div class="page-sub">// generate management reports</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:1.5rem">
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('fleet')"><div style="font-size:22px;margin-bottom:6px">🚗</div><div style="font-weight:600;margin-bottom:3px">Fleet Register</div><div style="font-size:12px;color:var(--muted)">All vehicles and owners</div></div>
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('service')"><div style="font-size:22px;margin-bottom:6px">🔧</div><div style="font-weight:600;margin-bottom:3px">Service Report</div><div style="font-size:12px;color:var(--muted)">Maintenance history and costs</div></div>
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('compliance')"><div style="font-size:22px;margin-bottom:6px">🛡️</div><div style="font-weight:600;margin-bottom:3px">Compliance Report</div><div style="font-size:12px;color:var(--muted)">Insurance and inspection status</div></div>
+      </div>
+      <div id="rpt-out" style="display:none">
+        <div class="card-hdr" style="background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;padding:10px 14px;display:flex;justify-content:space-between">
+          <span id="rpt-title" style="font-size:13px;font-weight:600;color:#fff"></span>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('rpt-out').style.display='none'">Close</button>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);padding:16px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.9;color:var(--muted);white-space:pre-wrap;max-height:400px;overflow-y:auto" id="rpt-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let owners=[
+  {id:'OWN-001',name:'James Mwangi',natId:'23456781',phone:'0712001001',email:'james@demo.com',addr:'Westlands',type:'Individual',status:'Active'},
+  {id:'OWN-002',name:'Autopak International Ltd',natId:'CO-2019-0441',phone:'0722100200',email:'fleet@autopak.co.ke',addr:'Industrial Area',type:'Company',status:'Active'},
+  {id:'OWN-003',name:'Fatuma Hassan',natId:'34567892',phone:'0723002002',email:'fatuma@demo.com',addr:'Mombasa Road',type:'Individual',status:'Active'},
+];
+
+let vehicles=[
+  {id:'VEH-001',reg:'KDA 123A',owner:'OWN-001',make:'Toyota',model:'Land Cruiser',year:2019,type:'SUV',engine:4500,fuel:'Diesel',colour:'Pearl White',mileage:87000,insExpiry:'2025-12-31',ntsa:'2025-09-30',status:'Active'},
+  {id:'VEH-002',reg:'KBZ 456B',owner:'OWN-002',make:'Isuzu',model:'NPR Truck',year:2021,type:'Truck',engine:3800,fuel:'Diesel',colour:'Blue',mileage:54000,insExpiry:'2025-08-15',ntsa:'2025-11-30',status:'Active'},
+  {id:'VEH-003',reg:'KCK 789C',owner:'OWN-002',make:'Toyota',model:'Hiace',year:2020,type:'Van',engine:2700,fuel:'Diesel',colour:'White',mileage:112000,insExpiry:'2025-10-20',ntsa:'2025-07-31',status:'In Service'},
+  {id:'VEH-004',reg:'KDD 321D',owner:'OWN-003',make:'Honda',model:'Civic',year:2022,type:'Saloon',engine:1500,fuel:'Petrol',colour:'Silver',mileage:23000,insExpiry:'2026-03-15',ntsa:'2026-01-31',status:'Active'},
+];
+
+let serviceHistory=[];
+let serviceDue=[
+  {vehicleId:'VEH-001',type:'Full Service',due:'2025-07-15',interval:'6 months',lastDone:'2025-01-15',status:'Due Soon'},
+  {vehicleId:'VEH-002',type:'Oil Change',due:'2025-06-30',interval:'5,000 km',lastDone:'2025-04-01',status:'Overdue'},
+  {vehicleId:'VEH-003',type:'Brake Service',due:'2025-07-01',interval:'Annual',lastDone:'2024-07-01',status:'Overdue'},
+  {vehicleId:'VEH-004',type:'Tyre Rotation',due:'2025-08-01',interval:'10,000 km',lastDone:'2025-02-01',status:'Upcoming'},
+];
+
+let activity=[];
+let ownCounter=4,vehCounter=5;
+
+function fmt(n){return Number(n).toLocaleString()}
+function today(){return new Date().toISOString().split('T')[0]}
+function timeNow(){return new Date().toLocaleString()}
+function getOwnerName(id){const o=owners.find(x=>x.id===id);return o?o.name:id}
+function getVehicle(id){return vehicles.find(v=>v.id===id)}
+function getVehLabel(id){const v=getVehicle(id);return v?`${v.reg} (${v.make} ${v.model})`:id}
+function daysUntil(date){return Math.floor((new Date(date)-new Date())/(1000*60*60*24))}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+
+function statusBadge(s){const m={Active:'green','In Service':'amber',Decommissioned:'red','Due Soon':'amber',Overdue:'red',Upcoming:'cyan',Valid:'green',Expired:'red',Expiring:'amber'};return `<span class="badge badge-${m[s]||'cyan'}">${s}</span>`}
+function docStatus(dateStr){const d=daysUntil(dateStr);if(d<0)return 'Expired';if(d<30)return 'Expiring';return 'Valid'}
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelector(`[onclick="showPanel('${name}')"]`)?.classList.add('active');
+  const map={dashboard:renderDashboard,vehicles:renderVehicles,owners:renderOwners,service:renderServiceSched,history:renderHistory,insurance:renderInsurance,'log-service':()=>{populateVehicleDropdowns();document.getElementById('ls-date').value=today()},'add-vehicle':populateOwnerDropdowns};
+  if(map[name])map[name]();
+}
+
+function populateOwnerDropdowns(){document.getElementById('av-owner').innerHTML=owners.map(o=>`<option value="${o.id}">${o.name}</option>`).join('')}
+function populateVehicleDropdowns(){
+  const sel=['ls-vehicle','hist-veh'];
+  sel.forEach(id=>{const el=document.getElementById(id);if(el){const isHist=id==='hist-veh';el.innerHTML=(isHist?'<option value="">All Vehicles</option>':'')+vehicles.map(v=>`<option value="${v.id}">${v.reg} — ${v.make} ${v.model}</option>`).join('')}});
+}
+
+function renderDashboard(){
+  document.getElementById('d-total').textContent=vehicles.length;
+  document.getElementById('d-active').textContent=vehicles.filter(v=>v.status==='Active').length;
+  document.getElementById('d-service').textContent=vehicles.filter(v=>v.status==='In Service').length;
+  document.getElementById('d-overdue').textContent=serviceDue.filter(s=>s.status==='Overdue').length;
+  document.getElementById('d-owners').textContent=owners.length;
+
+  const alerts=serviceDue.filter(s=>s.status==='Overdue');
+  document.getElementById('dash-alerts').innerHTML=alerts.length?`<div class="service-alert">⚠️ ${alerts.length} vehicle${alerts.length>1?'s need':'needs'} immediate attention: ${alerts.map(s=>getVehLabel(s.vehicleId)).join(', ')}</div>`:'';
+
+  document.getElementById('dash-service-due').innerHTML=serviceDue.slice(0,5).map(s=>`
+    <tr><td><code>${getVehicle(s.vehicleId)?.reg||s.vehicleId}</code></td><td>${getVehLabel(s.vehicleId)}</td><td>${s.type}</td><td>${s.due}</td><td>${getOwnerName(getVehicle(s.vehicleId)?.owner)}</td><td>${statusBadge(s.status)}</td></tr>`).join('');
+
+  document.getElementById('dash-activity').innerHTML=activity.slice(0,6).map(a=>`
+    <tr><td>${a.date}</td><td><code>${a.reg}</code></td><td>${a.action}</td><td style="color:var(--muted)">${a.detail}</td></tr>`).join('')||`<tr><td colspan="4" style="text-align:center;color:var(--dim);padding:1.5rem">No activity yet.</td></tr>`;
+}
+
+function renderVehicles(){
+  const q=(document.getElementById('veh-search')?.value||'').toLowerCase();
+  const sf=document.getElementById('veh-status-f')?.value||'';
+  const filtered=vehicles.filter(v=>(!q||v.reg.toLowerCase().includes(q)||v.make.toLowerCase().includes(q)||v.model.toLowerCase().includes(q)||getOwnerName(v.owner).toLowerCase().includes(q))&&(!sf||v.status===sf));
+  document.getElementById('vehicles-grid').innerHTML=filtered.map(v=>`
+    <div class="vehicle-card">
+      <div class="vehicle-icon">${{SUV:'🚙',Truck:'🚛',Van:'🚐',Bus:'🚌',Saloon:'🚗',Pickup:'🛻',Motorcycle:'🏍️'}[v.type]||'🚗'}</div>
+      <div>
+        <div class="vehicle-reg">${v.reg}</div>
+        <div class="vehicle-name">${v.make} ${v.model} · ${v.year} · ${v.colour}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          ${statusBadge(v.status)}
+          <span class="badge badge-cyan">${v.type}</span>
+          <span style="font-size:11px;color:var(--dim)">${fmt(v.mileage)} km</span>
+          <span style="font-size:11px;color:var(--dim)">${v.fuel} · ${v.engine}cc</span>
+        </div>
+        <div style="margin-top:4px;font-size:11px;color:var(--dim)">Owner: ${getOwnerName(v.owner)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <button class="btn btn-outline btn-sm" onclick="showVehicleDetail('${v.id}')">Details</button>
+        <button class="btn btn-amber btn-sm" onclick="scheduleService('${v.id}')">Service</button>
+      </div>
+    </div>`).join('')||`<div style="text-align:center;padding:3rem;color:var(--dim)">No vehicles found.</div>`;
+}
+
+function showVehicleDetail(id){
+  const v=getVehicle(id);if(!v)return;
+  const vServices=serviceHistory.filter(s=>s.vehicleId===id);
+  const totalCost=vServices.reduce((s,x)=>s+x.cost,0);
+  alert(`${v.reg} — ${v.make} ${v.model} ${v.year}\n\nOwner: ${getOwnerName(v.owner)}\nType: ${v.type} | Fuel: ${v.fuel} | Engine: ${v.engine}cc\nMileage: ${fmt(v.mileage)} km | Colour: ${v.colour}\nStatus: ${v.status}\n\nInsurance: ${v.insExpiry} (${docStatus(v.insExpiry)})\nInspection: ${v.ntsa} (${docStatus(v.ntsa)})\n\nService records: ${vServices.length} | Total cost: KES ${fmt(totalCost)}`);
+}
+
+function scheduleService(id){showPanel('log-service');setTimeout(()=>{document.getElementById('ls-vehicle').value=id},100)}
+
+function addVehicle(){
+  const reg=document.getElementById('av-reg').value.trim().toUpperCase();
+  const make=document.getElementById('av-make').value.trim();
+  const model=document.getElementById('av-model').value.trim();
+  if(!reg||!make||!model){toast('Fill required fields');return;}
+  if(vehicles.find(v=>v.reg===reg)){toast('Registration already exists');return;}
+  const id=`VEH-00${vehCounter++}`;
+  vehicles.push({id,reg,owner:document.getElementById('av-owner').value,make,model,year:Number(document.getElementById('av-year').value)||2024,type:document.getElementById('av-type').value,engine:Number(document.getElementById('av-engine').value)||0,fuel:document.getElementById('av-fuel').value,colour:document.getElementById('av-colour').value,mileage:Number(document.getElementById('av-mileage').value)||0,insExpiry:document.getElementById('av-insexp').value||'2026-12-31',ntsa:document.getElementById('av-ntsa').value||'2026-12-31',status:'Active'});
+  activity.unshift({date:timeNow(),reg,action:'Registered',detail:`${make} ${model} added to fleet`});
+  toast(`${reg} registered`);showPanel('vehicles');
+}
+
+function renderOwners(){
+  document.getElementById('owners-table').innerHTML=owners.map(o=>`
+    <tr><td><code>${o.id}</code></td><td><strong>${o.name}</strong></td><td>${o.phone}</td><td>${o.email}</td>
+    <td>${vehicles.filter(v=>v.owner===o.id).length}</td><td>${statusBadge(o.status)}</td></tr>`).join('');
+}
+
+function addOwner(){
+  const name=document.getElementById('ao-name').value.trim();
+  const phone=document.getElementById('ao-phone').value.trim();
+  if(!name||!phone){toast('Fill required fields');return;}
+  const id=`OWN-00${ownCounter++}`;
+  owners.push({id,name,natId:document.getElementById('ao-id').value,phone,email:document.getElementById('ao-email').value,addr:document.getElementById('ao-addr').value,type:document.getElementById('ao-type').value,status:'Active'});
+  toast(`${name} added`);showPanel('owners');
+}
+
+function renderServiceSched(){
+  document.getElementById('service-sched-table').innerHTML=serviceDue.map(s=>`
+    <tr><td>${getVehLabel(s.vehicleId)}</td><td>${s.type}</td><td>${s.due}</td><td>${s.interval}</td><td>${s.lastDone}</td><td>${statusBadge(s.status)}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="scheduleService('${s.vehicleId}')">Log</button></td></tr>`).join('');
+}
+
+function logService(){
+  const vehicleId=document.getElementById('ls-vehicle').value;
+  const type=document.getElementById('ls-type').value;
+  const date=document.getElementById('ls-date').value;
+  const cost=Number(document.getElementById('ls-cost').value)||0;
+  if(!vehicleId||!date){toast('Fill required fields');return;}
+  const v=getVehicle(vehicleId);
+  const rec={vehicleId,type,date,garage:document.getElementById('ls-garage').value,mileage:Number(document.getElementById('ls-mileage').value)||v?.mileage||0,cost,nextDate:document.getElementById('ls-next').value,nextMileage:Number(document.getElementById('ls-next-mileage').value)||0,notes:document.getElementById('ls-notes').value};
+  serviceHistory.unshift(rec);
+  if(v&&rec.mileage>v.mileage)v.mileage=rec.mileage;
+  const sd=serviceDue.find(s=>s.vehicleId===vehicleId&&s.type===type);
+  if(sd){sd.lastDone=date;sd.status=rec.nextDate?daysUntil(rec.nextDate)<30?'Due Soon':'Upcoming':'Upcoming';if(rec.nextDate)sd.due=rec.nextDate;}
+  activity.unshift({date:timeNow(),reg:v?.reg||vehicleId,action:'Service Logged',detail:`${type} — KES ${fmt(cost)}`});
+  toast(`Service record added for ${v?.reg}`);showPanel('history');
+}
+
+function renderHistory(){
+  const f=document.getElementById('hist-veh')?.value||'';
+  const filtered=serviceHistory.filter(s=>!f||s.vehicleId===f);
+  document.getElementById('history-table').innerHTML=filtered.map(s=>`
+    <tr><td>${s.date}</td><td><code>${getVehicle(s.vehicleId)?.reg||s.vehicleId}</code></td><td>${s.type}</td><td>${fmt(s.mileage)} km</td><td>${s.garage||'—'}</td><td>KES ${fmt(s.cost)}</td><td>${s.nextDate||'—'}</td></tr>`).join('')||`<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:2rem">No service records yet. Log one above.</td></tr>`;
+}
+
+function renderInsurance(){
+  document.getElementById('insurance-table').innerHTML=vehicles.map(v=>`
+    <tr><td><code>${v.reg}</code></td><td>${v.make} ${v.model} ${v.year}</td>
+    <td>${v.insExpiry}</td><td>${v.ntsa}</td>
+    <td>${statusBadge(docStatus(v.insExpiry))}</td><td>${statusBadge(docStatus(v.ntsa))}</td></tr>`).join('');
+}
+
+function genReport(type){
+  const out=document.getElementById('rpt-out');out.style.display='block';
+  const now=new Date().toLocaleString();const pad=(s,n)=>String(s).padEnd(n);
+  if(type==='fleet'){
+    document.getElementById('rpt-title').textContent='Fleet Register';
+    document.getElementById('rpt-content').textContent=`VEHICLE MANAGEMENT SYSTEM — FLEET REGISTER\nGenerated: ${now}\n${'─'.repeat(80)}\n\n${vehicles.map(v=>`${v.id}  ${v.reg.padEnd(12)}  ${(v.make+' '+v.model).padEnd(25)}  ${String(v.year).padEnd(6)}  ${getOwnerName(v.owner).substring(0,25).padEnd(26)}  ${v.status}`).join('\n')}\n\nTotal: ${vehicles.length} vehicles`;
+  } else if(type==='service'){
+    const total=serviceHistory.reduce((s,x)=>s+x.cost,0);
+    document.getElementById('rpt-title').textContent='Service Report';
+    document.getElementById('rpt-content').textContent=`VEHICLE MANAGEMENT SYSTEM — SERVICE REPORT\nGenerated: ${now}\n${'─'.repeat(80)}\n\n${serviceHistory.map(s=>`${s.date.padEnd(12)}  ${(getVehicle(s.vehicleId)?.reg||'').padEnd(12)}  ${s.type.padEnd(22)}  KES ${fmt(s.cost).padStart(10)}`).join('\n')||'No service records yet.'}\n\n${'─'.repeat(80)}\nTotal Maintenance Cost: KES ${fmt(total)}`;
+  } else {
+    document.getElementById('rpt-title').textContent='Compliance Report';
+    document.getElementById('rpt-content').textContent=`VEHICLE MANAGEMENT SYSTEM — COMPLIANCE REPORT\nGenerated: ${now}\n${'─'.repeat(80)}\n\n${vehicles.map(v=>`${v.reg.padEnd(12)}  ${(v.make+' '+v.model).padEnd(25)}\n  Insurance: ${v.insExpiry} [${docStatus(v.insExpiry)}]  |  Inspection: ${v.ntsa} [${docStatus(v.ntsa)}]`).join('\n\n')}`;
+  }
+  toast('Report generated');
+}
+
+// INIT
+renderDashboard();populateOwnerDropdowns();populateVehicleDropdowns();
+document.getElementById('ls-date').value=today();
+</script>
+</body>
+</html>

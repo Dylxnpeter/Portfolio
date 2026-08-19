@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Xpert Analytics — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060E1F;--surface:#0D1B2E;--surface2:#152236;--border:rgba(56,189,248,0.12);--cyan:#38BDF8;--cyan-dim:rgba(56,189,248,0.1);--purple:#7C3AED;--purple-dim:rgba(124,58,237,0.12);--green:#10B981;--green-dim:rgba(16,185,129,0.1);--amber:#F59E0B;--amber-dim:rgba(245,158,11,0.1);--coral:#F43F5E;--text:#E2E8F0;--muted:#94A3B8;--dim:#475569;--radius:10px;--radius-sm:6px}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.02) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0}
+
+.topbar{background:rgba(13,27,46,0.95);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:52px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.topbar-logo{font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;color:var(--cyan)}
+.topbar-logo span{font-size:18px}
+.demo-badge{background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.3);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--cyan)}
+.back-link{color:var(--muted);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:5px;transition:color 0.2s}
+.back-link:hover{color:var(--cyan)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+
+.app-shell{display:flex;height:calc(100vh - 52px);position:relative;z-index:1}
+.sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-section{padding:10px 0}
+.sidebar-label{font-size:10px;font-weight:600;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;padding:0 14px 6px;font-family:'JetBrains Mono',monospace}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all 0.15s;border-left:2px solid transparent}
+.nav-item:hover{background:var(--cyan-dim);color:var(--cyan)}
+.nav-item.active{background:var(--cyan-dim);color:var(--cyan);border-left-color:var(--cyan)}
+.nav-item .ni-icon{font-size:15px;width:18px;text-align:center}
+.sidebar-footer{margin-top:auto;padding:12px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+
+.main{flex:1;overflow-y:auto;padding:1.25rem}
+.panel{display:none}.panel.active{display:block}
+.page-header{margin-bottom:1.25rem}
+.page-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:2px}
+.page-sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* STAT CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.cyan::before{background:var(--cyan)}.stat-card.green::before{background:var(--green)}.stat-card.amber::before{background:var(--amber)}.stat-card.coral::before{background:var(--coral)}.stat-card.purple::before{background:var(--purple)}
+.stat-label{font-size:10px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.stat-val{font-size:22px;font-weight:700;color:#fff;line-height:1;margin-bottom:4px}
+.stat-sub{font-size:11px;color:var(--muted)}
+.stat-trend{font-size:11px;font-weight:600}
+.trend-up{color:var(--green)}.trend-down{color:var(--coral)}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.card-title{font-weight:600;font-size:13px;color:#fff;display:flex;align-items:center;gap:8px}
+.card-body{padding:16px}
+
+/* CHART GRID */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.chart-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+.chart-wrap{position:relative;height:200px}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:0.06em;padding:9px 12px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(56,189,248,0.03)}
+code{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--cyan);color:#000;font-weight:600}
+.btn-primary:hover{background:#7DD3FC}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-sm{padding:4px 10px;font-size:11px}
+
+/* BADGES */
+.badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.badge-green{background:var(--green-dim);color:var(--green)}.badge-amber{background:var(--amber-dim);color:var(--amber)}.badge-cyan{background:var(--cyan-dim);color:var(--cyan)}.badge-coral{background:rgba(244,63,94,0.1);color:var(--coral)}.badge-purple{background:var(--purple-dim);color:#A78BFA}
+
+/* PIPELINE VIZ */
+.pipeline{display:flex;align-items:center;gap:0;margin-bottom:1.25rem;overflow-x:auto;padding-bottom:4px}
+.pipe-stage{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;min-width:140px;flex-shrink:0}
+.pipe-arrow{color:var(--cyan);font-size:18px;flex-shrink:0;margin:0 4px}
+.pipe-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:0.08em;font-family:'JetBrains Mono',monospace;margin-bottom:4px}
+.pipe-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:4px}
+.pipe-detail{font-size:11px;color:var(--muted)}
+.pipe-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ETL LOG */
+.etl-log{background:#03070F;border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:2;max-height:200px;overflow-y:auto;color:var(--muted)}
+.log-green{color:var(--green)}.log-cyan{color:var(--cyan)}.log-amber{color:var(--amber)}.log-dim{color:var(--dim)}
+
+/* REPORT */
+.report-box{background:#03070F;border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.9;color:var(--muted);white-space:pre-wrap;max-height:380px;overflow-y:auto}
+
+/* FORM */
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end}
+.form-group{display:flex;flex-direction:column;gap:4px}
+label{font-size:11px;font-weight:500;color:var(--dim);font-family:'JetBrains Mono',monospace}
+select,input{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:'Inter',sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color 0.15s}
+select:focus,input:focus{border-color:var(--cyan)}
+select option{background:#0D1B2E}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:#0D1B2E;color:#fff;border:1px solid var(--cyan);padding:10px 18px;border-radius:var(--radius);font-size:12px;font-weight:500;z-index:1000;transform:translateY(60px);opacity:0;transition:all 0.3s;font-family:'JetBrains Mono',monospace}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* HEATMAP */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.heat-cell{height:14px;border-radius:2px;background:rgba(56,189,248,0.05);transition:background 0.2s;cursor:default}
+.heat-cell:hover{outline:1px solid var(--cyan)}
+.heat-1{background:rgba(56,189,248,0.15)}.heat-2{background:rgba(56,189,248,0.3)}.heat-3{background:rgba(56,189,248,0.5)}.heat-4{background:rgba(56,189,248,0.75)}.heat-5{background:var(--cyan)}
+
+/* PII MASK */
+.pii-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.pii-raw{color:var(--coral);font-family:'JetBrains Mono',monospace;font-size:11px;flex:1}
+.pii-arrow{color:var(--dim)}
+.pii-masked{color:var(--green);font-family:'JetBrains Mono',monospace;font-size:11px;flex:1}
+.pii-type{color:var(--dim);font-size:10px;font-family:'JetBrains Mono',monospace;width:80px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo"><span>📊</span> Xpert Analytics Platform</div>
+  <div class="topbar-right">
+    <span class="demo-badge">DEMO MODE</span>
+    <a href="../index.html" class="back-link">← Portfolio</a>
+  </div>
+</div>
+
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <div class="nav-item active" onclick="showPanel('dashboard')"><span class="ni-icon">🏠</span> Dashboard</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Data Pipeline</div>
+      <div class="nav-item" onclick="showPanel('pipeline')"><span class="ni-icon">🔄</span> ETL Pipeline</div>
+      <div class="nav-item" onclick="showPanel('pii')"><span class="ni-icon">🔒</span> PII Firewall</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analytics</div>
+      <div class="nav-item" onclick="showPanel('sales')"><span class="ni-icon">💰</span> Sales Analytics</div>
+      <div class="nav-item" onclick="showPanel('inventory')"><span class="ni-icon">📦</span> Inventory</div>
+      <div class="nav-item" onclick="showPanel('customers')"><span class="ni-icon">👥</span> Customers</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Reports</div>
+      <div class="nav-item" onclick="showPanel('reports')"><span class="ni-icon">📋</span> Generate Reports</div>
+    </div>
+    <div class="sidebar-footer">
+      layer: warehouse · jwt: active<br>rbac: admin · env: demo
+    </div>
+  </div>
+
+  <div class="main" id="main-content">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-header">
+        <div class="page-title">Analytics Dashboard</div>
+        <div class="page-sub">// real-time KPIs from the warehouse layer · last sync: just now</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card cyan"><div class="stat-label">Monthly Revenue</div><div class="stat-val" id="kpi-revenue">KES 0</div><div class="stat-trend trend-up">↑ 12.4% vs last month</div></div>
+        <div class="stat-card green"><div class="stat-label">Units Sold</div><div class="stat-val" id="kpi-units">0</div><div class="stat-trend trend-up">↑ 8.1%</div></div>
+        <div class="stat-card amber"><div class="stat-label">Active SKUs</div><div class="stat-val" id="kpi-skus">0</div><div class="stat-sub">In stock</div></div>
+        <div class="stat-card coral"><div class="stat-label">Low Stock Alerts</div><div class="stat-val" id="kpi-alerts">0</div><div class="stat-trend trend-down">Needs reorder</div></div>
+        <div class="stat-card purple"><div class="stat-label">Active Customers</div><div class="stat-val" id="kpi-customers">0</div><div class="stat-trend trend-up">↑ 3 new this month</div></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card"><div class="chart-title">Revenue — Last 6 Months</div><div class="chart-wrap"><canvas id="chart-revenue"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Sales by Category</div><div class="chart-wrap"><canvas id="chart-category"></canvas></div></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card"><div class="chart-title">Top 5 Products by Revenue</div><div class="chart-wrap"><canvas id="chart-products"></canvas></div></div>
+        <div class="chart-card">
+          <div class="chart-title">Transaction Activity (last 28 days)</div>
+          <div class="heatmap" id="heatmap"></div>
+          <div style="display:flex;gap:6px;margin-top:10px;align-items:center;font-size:10px;color:var(--dim)">
+            <span>Less</span>
+            <span class="heat-cell" style="width:14px;display:inline-block"></span>
+            <span class="heat-cell heat-2" style="width:14px;display:inline-block"></span>
+            <span class="heat-cell heat-3" style="width:14px;display:inline-block"></span>
+            <span class="heat-cell heat-5" style="width:14px;display:inline-block"></span>
+            <span>More</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">⚡ Recent Transactions</span><button class="btn btn-outline btn-sm" onclick="showPanel('sales')">View All</button></div>
+        <table><thead><tr><th>Tx ID</th><th>Customer</th><th>Product</th><th>Qty</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="recent-tx"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="panel" id="panel-pipeline">
+      <div class="page-header"><div class="page-title">ETL Pipeline</div><div class="page-sub">// MySQL ERP → Transform → PostgreSQL Warehouse · 5-layer architecture</div></div>
+      <div class="pipeline">
+        <div class="pipe-stage"><div class="pipe-label">Layer 1 · Source</div><div class="pipe-name">MySQL ERP</div><div class="pipe-detail"><span class="pipe-dot"></span>FrontAccounting</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage"><div class="pipe-label">Layer 2 · Extract</div><div class="pipe-name">ETL Engine</div><div class="pipe-detail"><span class="pipe-dot"></span>Python · Cron</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage"><div class="pipe-label">Layer 3 · Firewall</div><div class="pipe-name">PII Anonymiser</div><div class="pipe-detail"><span class="pipe-dot"></span>SHA-256 + Salt</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage"><div class="pipe-label">Layer 4 · Warehouse</div><div class="pipe-name">PostgreSQL DW</div><div class="pipe-detail"><span class="pipe-dot"></span>Fact + Dim tables</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage"><div class="pipe-label">Layer 5 · API</div><div class="pipe-name">FastAPI + Streamlit</div><div class="pipe-detail"><span class="pipe-dot"></span>JWT RBAC</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">🔄 Run ETL Pipeline</span><button class="btn btn-primary btn-sm" onclick="runETL()">▶ Run Now</button></div>
+        <div class="card-body">
+          <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+            <div class="form-group"><label>Source Table</label><select id="etl-table"><option>sales_orders</option><option>inventory</option><option>customers</option><option>payments</option><option>all_tables</option></select></div>
+            <div class="form-group"><label>Date Range</label><select id="etl-range"><option>Last 24 hours</option><option>Last 7 days</option><option>Last 30 days</option><option>Full sync</option></select></div>
+            <div class="form-group"><label>PII Masking</label><select id="etl-pii"><option>Enabled (default)</option><option>Disabled (internal only)</option></select></div>
+          </div>
+          <div class="etl-log" id="etl-log"><span class="log-dim">// ETL log ready. Click "Run Now" to start pipeline.</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">📅 Pipeline Schedule</span></div>
+        <table><thead><tr><th>Job</th><th>Schedule</th><th>Last Run</th><th>Duration</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><code>etl_sales_daily</code></td><td>Every day 02:00</td><td>Today 02:00</td><td>1m 24s</td><td><span class="badge badge-green">SUCCESS</span></td></tr>
+          <tr><td><code>etl_inventory_sync</code></td><td>Every 6 hours</td><td>4 hours ago</td><td>0m 47s</td><td><span class="badge badge-green">SUCCESS</span></td></tr>
+          <tr><td><code>etl_customers_weekly</code></td><td>Every Monday 03:00</td><td>3 days ago</td><td>2m 11s</td><td><span class="badge badge-green">SUCCESS</span></td></tr>
+          <tr><td><code>etl_payments_daily</code></td><td>Every day 02:30</td><td>Today 02:30</td><td>0m 58s</td><td><span class="badge badge-green">SUCCESS</span></td></tr>
+          <tr><td><code>warehouse_vacuum</code></td><td>Every Sunday 01:00</td><td>4 days ago</td><td>5m 02s</td><td><span class="badge badge-cyan">SCHEDULED</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- PII FIREWALL -->
+    <div class="panel" id="panel-pii">
+      <div class="page-header"><div class="page-title">PII Anonymisation Firewall</div><div class="page-sub">// SHA-256 + salt hashing · customer data never enters the warehouse in raw form</div></div>
+      <div class="stats-row">
+        <div class="stat-card cyan"><div class="stat-label">Fields Masked</div><div class="stat-val">6</div><div class="stat-sub">Per customer record</div></div>
+        <div class="stat-card green"><div class="stat-label">Records Protected</div><div class="stat-val" id="pii-records">0</div><div class="stat-sub">Total hashed IDs</div></div>
+        <div class="stat-card amber"><div class="stat-label">Algorithm</div><div class="stat-val" style="font-size:14px;margin-top:4px">SHA-256</div><div class="stat-sub">+ per-record salt</div></div>
+        <div class="stat-card purple"><div class="stat-label">Re-ID Risk</div><div class="stat-val" style="font-size:14px;color:var(--green);margin-top:4px">LOW</div><div class="stat-sub">With salting enabled</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">🔒 Live Masking Preview</span><button class="btn btn-primary btn-sm" onclick="refreshPII()">Refresh Sample</button></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 24px 1fr 80px;gap:8px;margin-bottom:8px;font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;padding:0 0 6px;border-bottom:1px solid var(--border)">
+            <span>RAW VALUE (ERP)</span><span></span><span>HASHED VALUE (WAREHOUSE)</span><span>FIELD TYPE</span>
+          </div>
+          <div id="pii-rows"></div>
+          <div style="margin-top:16px;padding:12px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);font-size:11px;color:var(--amber)">
+            ⚠️ <strong>Security Note:</strong> SHA-256 without salting is vulnerable to rainbow table attacks. This implementation uses per-record salts stored in a separate key vault, preventing pre-computation attacks.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SALES -->
+    <div class="panel" id="panel-sales">
+      <div class="page-header"><div class="page-title">Sales Analytics</div><div class="page-sub">// fact_sales · aggregated from ERP warehouse layer</div></div>
+      <div class="stats-row">
+        <div class="stat-card cyan"><div class="stat-label">Total Revenue</div><div class="stat-val" id="s-revenue">0</div></div>
+        <div class="stat-card green"><div class="stat-label">Total Orders</div><div class="stat-val" id="s-orders">0</div></div>
+        <div class="stat-card amber"><div class="stat-label">Avg Order Value</div><div class="stat-val" id="s-aov">0</div></div>
+        <div class="stat-card purple"><div class="stat-label">Top Region</div><div class="stat-val" style="font-size:14px;margin-top:4px">Nairobi</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 All Transactions</span>
+          <div style="display:flex;gap:8px">
+            <select id="filter-status" onchange="renderSalesTable()" style="font-size:12px;padding:5px 8px"><option value="">All Status</option><option>Completed</option><option>Pending</option><option>Refunded</option></select>
+            <select id="filter-cat" onchange="renderSalesTable()" style="font-size:12px;padding:5px 8px"><option value="">All Categories</option><option>Packaging</option><option>Containers</option><option>Labels</option><option>Machinery</option><option>Consumables</option></select>
+          </div>
+        </div>
+        <table><thead><tr><th>Tx ID</th><th>Customer</th><th>Product</th><th>Category</th><th>Qty</th><th>Unit Price</th><th>Total</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="sales-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="panel" id="panel-inventory">
+      <div class="page-header"><div class="page-title">Inventory Dashboard</div><div class="page-sub">// dim_products · real-time stock from warehouse sync</div></div>
+      <div class="search-bar" style="display:flex;gap:8px;margin-bottom:1rem">
+        <input id="inv-search" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;background:var(--surface2);color:var(--text);outline:none" placeholder="Search SKU or product name…" oninput="renderInventory()"/>
+        <select id="inv-filter" onchange="renderInventory()" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;background:var(--surface2);color:var(--text)"><option value="">All Status</option><option>In Stock</option><option>Low Stock</option><option>Out of Stock</option></select>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>SKU</th><th>Product Name</th><th>Category</th><th>Stock Qty</th><th>Reorder Point</th><th>Unit Cost</th><th>Stock Value</th><th>Status</th></tr></thead>
+        <tbody id="inv-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div class="panel" id="panel-customers">
+      <div class="page-header"><div class="page-title">Customer Intelligence</div><div class="page-sub">// dim_customers · hashed IDs from PII firewall</div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">👥 Customer Records (PII-Masked)</span></div>
+        <table><thead><tr><th>Hashed ID</th><th>Company</th><th>Region</th><th>Orders</th><th>Total Spend</th><th>Last Order</th><th>Tier</th></tr></thead>
+        <tbody id="customer-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="panel" id="panel-reports">
+      <div class="page-header"><div class="page-title">Report Generator</div><div class="page-sub">// FastAPI → Streamlit export layer</div></div>
+      <div class="card" style="padding:16px;margin-bottom:1rem">
+        <div class="form-row">
+          <div class="form-group"><label>Report Type</label>
+            <select id="rpt-type">
+              <option>Sales Summary</option><option>Inventory Valuation</option><option>Customer Activity</option>
+              <option>Revenue by Category</option><option>Top Products</option><option>ETL Audit Log</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Period</label>
+            <select id="rpt-period"><option>This Month</option><option>Last Month</option><option>Last Quarter</option><option>YTD</option></select>
+          </div>
+          <div class="form-group"><label>Format</label>
+            <select id="rpt-format"><option>Tabular (Console)</option><option>Summary</option></select>
+          </div>
+          <div><button class="btn btn-primary" onclick="generateReport()" style="margin-top:18px">Generate Report</button></div>
+        </div>
+      </div>
+      <div id="report-output" style="display:none">
+        <div class="card-header" style="background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;padding:10px 14px;display:flex;justify-content:space-between">
+          <span style="font-size:12px;font-weight:600;color:#fff" id="rpt-title"></span>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('report-output').style.display='none'">Close</button>
+        </div>
+        <div class="report-box" id="rpt-content"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SEED DATA ──
+const PRODUCTS=[
+  {sku:'PKG-001',name:'Corrugated Box 30x20x15',cat:'Packaging',stock:840,reorder:200,cost:85},
+  {sku:'PKG-002',name:'Stretch Wrap Film 500m',cat:'Packaging',stock:112,reorder:150,cost:1200},
+  {sku:'CTN-001',name:'HDPE Container 5L',cat:'Containers',stock:2340,reorder:500,cost:320},
+  {sku:'CTN-002',name:'PET Bottle 1L Clear',cat:'Containers',stock:0,reorder:1000,cost:45},
+  {sku:'LBL-001',name:'Thermal Label Roll 100mm',cat:'Labels',stock:67,reorder:100,cost:450},
+  {sku:'LBL-002',name:'Barcode Sticker A4 Sheet',cat:'Labels',stock:890,reorder:200,cost:120},
+  {sku:'MCH-001',name:'Shrink Tunnel ST-400',cat:'Machinery',stock:3,reorder:2,cost:185000},
+  {sku:'CSM-001',name:'Packing Tape 48mm x 66m',cat:'Consumables',stock:34,reorder:100,cost:280},
+  {sku:'CSM-002',name:'Bubble Wrap Roll 1.2m',cat:'Consumables',stock:445,reorder:100,cost:3200},
+  {sku:'PKG-003',name:'Mailer Box 25x20x10',cat:'Packaging',stock:1200,reorder:300,cost:65},
+];
+
+const CUSTOMERS=[
+  {raw:'Bidco Africa Ltd',region:'Nairobi',orders:47,spend:2840000,last:'2025-06-20',tier:'Platinum'},
+  {raw:'Twiga Foods Ltd',region:'Nairobi',orders:31,spend:1650000,last:'2025-06-18',tier:'Gold'},
+  {raw:'Brookside Dairy',region:'Nakuru',orders:28,spend:1230000,last:'2025-06-15',tier:'Gold'},
+  {raw:'Kevian Kenya Ltd',region:'Thika',orders:19,spend:780000,last:'2025-06-10',tier:'Silver'},
+  {raw:'Unga Group PLC',region:'Nairobi',orders:22,spend:950000,last:'2025-06-22',tier:'Gold'},
+  {raw:'Cooper Motor Corp',region:'Mombasa',orders:8,spend:340000,last:'2025-05-30',tier:'Bronze'},
+  {raw:'Highlands Drinks',region:'Nakuru',orders:15,spend:560000,last:'2025-06-01',tier:'Silver'},
+];
+
+function hashId(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charCodeAt(i)|0;return Math.abs(h).toString(16).padStart(8,'0').toUpperCase()+'...'+Math.abs(h^0xDEADBEEF).toString(16).padStart(4,'0').toUpperCase()}
+
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun'];
+const REV=[3420000,2980000,4100000,3750000,4580000,5120000];
+
+let TRANSACTIONS=[];
+(()=>{
+  const products=PRODUCTS.filter(p=>p.stock>0||p.sku==='CTN-002');
+  const statuses=['Completed','Completed','Completed','Completed','Pending','Refunded'];
+  for(let i=1;i<=40;i++){
+    const p=products[i%products.length];
+    const c=CUSTOMERS[i%CUSTOMERS.length];
+    const qty=Math.floor(Math.random()*50)+1;
+    const day=String(Math.floor(Math.random()*22)+1).padStart(2,'0');
+    TRANSACTIONS.push({
+      id:`TX-${String(i).padStart(4,'0')}`,customer:c.raw,product:p.name,
+      cat:p.cat,qty,price:p.cost,total:qty*p.cost,
+      date:`2025-06-${day}`,status:statuses[i%statuses.length]
+    });
+  }
+})();
+
+// ── HELPERS ──
+function fmt(n){return Number(n).toLocaleString()}
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelector(`[onclick="showPanel('${name}')"]`)?.classList.add('active');
+  if(name==='dashboard')renderDashboard();
+  if(name==='sales')renderSalesPanel();
+  if(name==='inventory')renderInventory();
+  if(name==='customers')renderCustomers();
+  if(name==='pii')renderPII();
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function statusBadge(s){const m={Completed:'green',Pending:'amber',Refunded:'coral','In Stock':'green','Low Stock':'amber','Out of Stock':'coral',Platinum:'purple',Gold:'amber',Silver:'cyan',Bronze:'coral'};return `<span class="badge badge-${m[s]||'cyan'}">${s}</span>`}
+
+// ── CHARTS ──
+let charts={};
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
+const CHART_DEFAULTS={color:'rgba(255,255,255,0.7)',grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'rgba(255,255,255,0.4)'}};
+
+function renderDashboard(){
+  // KPIs
+  const totalRev=REV.reduce((a,b)=>a+b,0);
+  document.getElementById('kpi-revenue').textContent='KES '+fmt(REV[5]);
+  document.getElementById('kpi-units').textContent=fmt(TRANSACTIONS.filter(t=>t.status==='Completed').reduce((s,t)=>s+t.qty,0));
+  document.getElementById('kpi-skus').textContent=PRODUCTS.filter(p=>p.stock>0).length;
+  document.getElementById('kpi-alerts').textContent=PRODUCTS.filter(p=>p.stock>0&&p.stock<=p.reorder).length;
+  document.getElementById('kpi-customers').textContent=CUSTOMERS.length;
+
+  // Revenue chart
+  destroyChart('revenue');
+  charts['revenue']=new Chart(document.getElementById('chart-revenue'),{
+    type:'bar',
+    data:{labels:MONTHS,datasets:[{label:'Revenue (KES)',data:REV,backgroundColor:'rgba(56,189,248,0.3)',borderColor:'rgba(56,189,248,0.8)',borderWidth:2,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{...CHART_DEFAULTS},y:{...CHART_DEFAULTS,ticks:{...CHART_DEFAULTS.ticks,callback:v=>'KES '+fmt(v)}}}}
+  });
+
+  // Category donut
+  const cats={};TRANSACTIONS.forEach(t=>{cats[t.cat]=(cats[t.cat]||0)+t.total});
+  destroyChart('category');
+  charts['category']=new Chart(document.getElementById('chart-category'),{
+    type:'doughnut',
+    data:{labels:Object.keys(cats),datasets:[{data:Object.values(cats),backgroundColor:['rgba(56,189,248,0.8)','rgba(124,58,237,0.8)','rgba(16,185,129,0.8)','rgba(245,158,11,0.8)','rgba(244,63,94,0.8)'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'rgba(255,255,255,0.6)',font:{size:11}}}}}
+  });
+
+  // Top products bar
+  const pRev={};TRANSACTIONS.forEach(t=>{pRev[t.product]=(pRev[t.product]||0)+t.total});
+  const top5=Object.entries(pRev).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  destroyChart('products');
+  charts['products']=new Chart(document.getElementById('chart-products'),{
+    type:'bar',
+    data:{labels:top5.map(([k])=>k.substring(0,18)+'…'),datasets:[{data:top5.map(([,v])=>v),backgroundColor:'rgba(124,58,237,0.6)',borderColor:'rgba(167,139,250,0.8)',borderWidth:1,borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{...CHART_DEFAULTS},y:{...CHART_DEFAULTS}}}
+  });
+
+  // Heatmap
+  const hm=document.getElementById('heatmap');hm.innerHTML='';
+  for(let i=0;i<28;i++){const v=Math.floor(Math.random()*6);const d=document.createElement('div');d.className=`heat-cell${v?' heat-'+Math.min(v,5):''}`;d.title=`Day ${i+1}: ${v*3} transactions`;hm.appendChild(d)}
+
+  // Recent TX
+  document.getElementById('recent-tx').innerHTML=TRANSACTIONS.slice(0,8).map(t=>`<tr><td><code>${t.id}</code></td><td>${t.customer}</td><td>${t.product.substring(0,20)}…</td><td>${t.qty}</td><td>KES ${fmt(t.total)}</td><td>${t.date}</td><td>${statusBadge(t.status)}</td></tr>`).join('');
+}
+
+function renderSalesPanel(){
+  const rev=TRANSACTIONS.filter(t=>t.status==='Completed').reduce((s,t)=>s+t.total,0);
+  const orders=TRANSACTIONS.filter(t=>t.status==='Completed').length;
+  document.getElementById('s-revenue').textContent='KES '+fmt(rev);
+  document.getElementById('s-orders').textContent=orders;
+  document.getElementById('s-aov').textContent='KES '+fmt(Math.round(rev/orders));
+  renderSalesTable();
+}
+
+function renderSalesTable(){
+  const sf=document.getElementById('filter-status').value;
+  const cf=document.getElementById('filter-cat').value;
+  const filtered=TRANSACTIONS.filter(t=>(!sf||t.status===sf)&&(!cf||t.cat===cf));
+  document.getElementById('sales-table').innerHTML=filtered.map(t=>`<tr><td><code>${t.id}</code></td><td>${t.customer}</td><td>${t.product.substring(0,22)}…</td><td><span class="badge badge-cyan">${t.cat}</span></td><td>${t.qty}</td><td>KES ${fmt(t.price)}</td><td>KES ${fmt(t.total)}</td><td>${t.date}</td><td>${statusBadge(t.status)}</td></tr>`).join('');
+}
+
+function renderInventory(){
+  const q=(document.getElementById('inv-search').value||'').toLowerCase();
+  const f=document.getElementById('inv-filter').value;
+  const filtered=PRODUCTS.filter(p=>{
+    const status=p.stock===0?'Out of Stock':p.stock<=p.reorder?'Low Stock':'In Stock';
+    return (!q||p.sku.toLowerCase().includes(q)||p.name.toLowerCase().includes(q))&&(!f||status===f);
+  });
+  document.getElementById('inv-table').innerHTML=filtered.map(p=>{
+    const status=p.stock===0?'Out of Stock':p.stock<=p.reorder?'Low Stock':'In Stock';
+    return `<tr><td><code>${p.sku}</code></td><td>${p.name}</td><td><span class="badge badge-cyan">${p.cat}</span></td><td>${fmt(p.stock)}</td><td>${fmt(p.reorder)}</td><td>KES ${fmt(p.cost)}</td><td>KES ${fmt(p.stock*p.cost)}</td><td>${statusBadge(status)}</td></tr>`;
+  }).join('');
+}
+
+function renderCustomers(){
+  document.getElementById('customer-table').innerHTML=CUSTOMERS.map(c=>`<tr><td><code style="font-size:10px">${hashId(c.raw)}</code></td><td>${c.raw}</td><td>${c.region}</td><td>${c.orders}</td><td>KES ${fmt(c.spend)}</td><td>${c.last}</td><td>${statusBadge(c.tier)}</td></tr>`).join('');
+}
+
+function renderPII(){
+  document.getElementById('pii-records').textContent=CUSTOMERS.length;
+  refreshPII();
+}
+
+function refreshPII(){
+  const fields=[
+    {raw:'bidco.procurement@bidco.co.ke',type:'email'},
+    {raw:'0722 100 123',type:'phone'},
+    {raw:'James Kamau Mwangi',type:'full_name'},
+    {raw:'P.O Box 41789-00100',type:'address'},
+    {raw:'KE-NBI-2024-07891',type:'customer_id'},
+    {raw:'0100123456789',type:'bank_ref'},
+  ];
+  document.getElementById('pii-rows').innerHTML=fields.map(f=>`
+    <div class="pii-row">
+      <span class="pii-type">${f.type}</span>
+      <span class="pii-raw">${f.raw}</span>
+      <span class="pii-arrow">→</span>
+      <span class="pii-masked">${hashId(f.raw+Math.random())}</span>
+    </div>`).join('');
+}
+
+// ── ETL RUNNER ──
+function runETL(){
+  const table=document.getElementById('etl-table').value;
+  const range=document.getElementById('etl-range').value;
+  const log=document.getElementById('etl-log');
+  log.innerHTML='';
+  const lines=[
+    {t:0,c:'log-dim',m:`[${new Date().toLocaleTimeString()}] ETL job started: ${table}`},
+    {t:400,c:'log-cyan',m:`  ↳ Connecting to MySQL source (FrontAccounting)…`},
+    {t:800,c:'log-green',m:`  ✓ Connection established · source rows: ${Math.floor(Math.random()*5000)+1000}`},
+    {t:1200,c:'log-cyan',m:`  ↳ Extracting ${range}…`},
+    {t:1800,c:'log-green',m:`  ✓ Extracted ${Math.floor(Math.random()*800)+200} records`},
+    {t:2200,c:'log-amber',m:`  ↳ Applying PII anonymisation firewall…`},
+    {t:2700,c:'log-green',m:`  ✓ PII masked: 6 fields per record · SHA-256 + salt`},
+    {t:3100,c:'log-cyan',m:`  ↳ Transforming schema for warehouse…`},
+    {t:3600,c:'log-green',m:`  ✓ Schema mapped: fact_${table} ← source columns`},
+    {t:4000,c:'log-cyan',m:`  ↳ Loading into PostgreSQL warehouse…`},
+    {t:4700,c:'log-green',m:`  ✓ Loaded successfully · upserted: ${Math.floor(Math.random()*400)+100} rows`},
+    {t:5000,c:'log-green',m:`  ✓ ETL job complete · duration: ${(Math.random()*2+0.8).toFixed(2)}s`},
+  ];
+  lines.forEach(l=>setTimeout(()=>{
+    const span=document.createElement('span');
+    span.className=l.c;span.textContent=l.m+'\n';
+    log.appendChild(span);log.scrollTop=log.scrollHeight;
+  },l.t));
+  setTimeout(()=>toast('✓ ETL pipeline completed successfully'),5200);
+}
+
+// ── REPORT GENERATOR ──
+function generateReport(){
+  const type=document.getElementById('rpt-type').value;
+  const period=document.getElementById('rpt-period').value;
+  const out=document.getElementById('report-output');
+  const content=document.getElementById('rpt-content');
+  const title=document.getElementById('rpt-title');
+  out.style.display='block';
+  const pad=(s,n)=>String(s).padEnd(n);
+  const now=new Date().toLocaleString();
+  if(type==='Sales Summary'){
+    const completed=TRANSACTIONS.filter(t=>t.status==='Completed');
+    const rev=completed.reduce((s,t)=>s+t.total,0);
+    title.textContent='Sales Summary Report — '+period;
+    content.textContent=`XPERT ANALYTICS PLATFORM\nSALES SUMMARY REPORT\nPeriod: ${period}  |  Generated: ${now}\n${'─'.repeat(80)}\n\n${pad('TX ID',10)}${pad('CUSTOMER',28)}${pad('PRODUCT',30)}${pad('QTY',6)}${pad('TOTAL (KES)',14)}\n${'─'.repeat(80)}\n${completed.slice(0,15).map(t=>`${pad(t.id,10)}${pad(t.customer,28)}${pad(t.product.substring(0,28),30)}${pad(t.qty,6)}${pad(fmt(t.total),14)}`).join('\n')}\n\n${'─'.repeat(80)}\nTotal Orders: ${completed.length}  |  Total Revenue: KES ${fmt(rev)}  |  Avg Order: KES ${fmt(Math.round(rev/completed.length))}`;
+  } else if(type==='Inventory Valuation'){
+    const total=PRODUCTS.reduce((s,p)=>s+p.stock*p.cost,0);
+    title.textContent='Inventory Valuation Report — '+period;
+    content.textContent=`XPERT ANALYTICS PLATFORM\nINVENTORY VALUATION REPORT\nGenerated: ${now}\n${'─'.repeat(80)}\n\n${pad('SKU',12)}${pad('PRODUCT',35)}${pad('QTY',8)}${pad('UNIT COST',14)}${'STOCK VALUE'.padStart(14)}\n${'─'.repeat(80)}\n${PRODUCTS.map(p=>`${pad(p.sku,12)}${pad(p.name.substring(0,33),35)}${pad(fmt(p.stock),8)}${pad('KES '+fmt(p.cost),14)}${'KES '+fmt(p.stock*p.cost)}`).join('\n')}\n\n${'─'.repeat(80)}\nTotal SKUs: ${PRODUCTS.length}  |  Total Inventory Value: KES ${fmt(total)}`;
+  } else {
+    title.textContent=type+' — '+period;
+    content.textContent=`XPERT ANALYTICS PLATFORM\n${type.toUpperCase()}\nPeriod: ${period}  |  Generated: ${now}\n${'─'.repeat(60)}\n\n[Report data generated from PostgreSQL warehouse]\n\n${CUSTOMERS.map((c,i)=>`${String(i+1).padStart(2,'0')}. ${c.raw.padEnd(30)} Orders: ${c.orders}  Spend: KES ${fmt(c.spend)}  Tier: ${c.tier}`).join('\n')}`;
+  }
+  toast('Report generated successfully');
+}
+
+// ── INIT ──
+renderDashboard();
+</script>
+</body>
+</html>

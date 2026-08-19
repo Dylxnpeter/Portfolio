@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Bonga Points Reward System — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#FFF8F0;--surface:#FFFFFF;--surface2:#FFF3E8;--border:#F0D9C0;--text:#1A0A00;--muted:#8B6E5A;--dim:#C4A882;--orange:#EA580C;--orange-dim:#FFF0E6;--orange-deep:#C2410C;--gold:#D97706;--gold-dim:#FEF3C7;--green:#059669;--green-dim:#D1FAE5;--red:#DC2626;--red-dim:#FEE2E2;--purple:#7C3AED;--purple-dim:#EDE9FE;--radius:12px;--radius-sm:8px}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+.topbar{background:linear-gradient(135deg,#EA580C,#DC2626);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:52px;position:sticky;top:0;z-index:100}
+.topbar-logo{font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;color:#fff}
+.demo-badge{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:#fff}
+.back-link{color:rgba(255,255,255,0.8);text-decoration:none;font-size:13px}.back-link:hover{color:#fff}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.app-shell{display:flex;height:calc(100vh - 52px)}
+.sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto}
+.sidebar-section{padding:8px 0}
+.sidebar-label{font-size:10px;font-weight:600;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;padding:0 14px 6px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all 0.15s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--orange-dim);color:var(--orange)}.nav-item.active{background:var(--orange-dim);color:var(--orange);border-left-color:var(--orange)}
+.main{flex:1;overflow-y:auto;padding:1.5rem}
+.panel{display:none}.panel.active{display:block}
+.page-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:2px}
+.page-sub{font-size:12px;color:var(--muted);margin-bottom:1.25rem}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:1.25rem}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.stat-l{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.stat-v{font-size:22px;font-weight:700;color:var(--text);line-height:1;margin-bottom:3px}
+.stat-s{font-size:11px;color:var(--muted)}
+.stat.orange{border-left:3px solid var(--orange)}.stat.gold{border-left:3px solid var(--gold)}.stat.green{border-left:3px solid var(--green)}.stat.red{border-left:3px solid var(--red)}.stat.purple{border-left:3px solid var(--purple)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:13px}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:9px 12px;text-align:left;background:#FFFAF5;border-bottom:1px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid #F9F5F0;font-size:12px;color:var(--text)}
+tr:last-child td{border-bottom:none}tr:hover td{background:#FFFAF5}
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-orange{background:var(--orange-dim);color:var(--orange)}.badge-gold{background:var(--gold-dim);color:var(--gold)}.badge-green{background:var(--green-dim);color:var(--green)}.badge-red{background:var(--red-dim);color:var(--red)}.badge-purple{background:var(--purple-dim);color:var(--purple)}
+.btn{padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-deep)}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--orange);color:var(--orange)}
+.btn-sm{padding:4px 10px;font-size:12px}.btn-gold{background:var(--gold-dim);color:var(--gold);border:1px solid #FDE68A}.btn-green{background:var(--green-dim);color:var(--green);border:1px solid #A7F3D0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:500;color:var(--muted)}
+input,select{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color 0.15s}
+input:focus,select:focus{border-color:var(--orange)}
+
+/* MEMBER CARD */
+.member-card{background:linear-gradient(135deg,#EA580C,#DC2626);color:#fff;border-radius:var(--radius);padding:20px;margin-bottom:1rem;position:relative;overflow:hidden}
+.member-card::after{content:'🎁';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:4rem;opacity:0.15}
+.mc-name{font-size:18px;font-weight:700;margin-bottom:4px}
+.mc-id{font-size:12px;opacity:0.8;font-family:'JetBrains Mono',monospace;margin-bottom:12px}
+.mc-points{font-size:36px;font-weight:700;line-height:1}
+.mc-points-label{font-size:11px;opacity:0.8;margin-top:4px}
+.mc-tier{position:absolute;top:16px;right:16px;font-size:12px;font-weight:600;background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px}
+
+/* REWARDS GRID */
+.rewards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:1rem}
+.reward-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;transition:all 0.2s;cursor:pointer}
+.reward-card:hover{border-color:var(--orange);transform:translateY(-2px);box-shadow:0 4px 12px rgba(234,88,12,0.1)}
+.reward-icon{font-size:2.5rem;margin-bottom:8px}
+.reward-name{font-weight:600;font-size:13px;margin-bottom:4px}
+.reward-pts{font-size:18px;font-weight:700;color:var(--orange);margin-bottom:8px}
+.reward-cat{font-size:11px;color:var(--muted)}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--orange);color:#fff;padding:10px 18px;border-radius:var(--radius);font-size:13px;font-weight:600;z-index:1000;transform:translateY(60px);opacity:0;transition:all 0.3s}
+.toast.show{transform:translateY(0);opacity:1}
+
+.tier-bar{display:flex;gap:0;margin:1rem 0;border-radius:var(--radius-sm);overflow:hidden;height:8px}
+.tier-seg{flex:1;transition:opacity 0.2s}
+.tier-seg.active{opacity:1}.tier-seg.inactive{opacity:0.2}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">🎁 Bonga Points Reward System<span class="demo-badge">DEMO</span></div>
+  <div class="topbar-right"><a href="../index.html" class="back-link">← Portfolio</a></div>
+</div>
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <div class="nav-item active" onclick="showPanel('dashboard')">🏠 Dashboard</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Members</div>
+      <div class="nav-item" onclick="showPanel('members')">👥 All Members</div>
+      <div class="nav-item" onclick="showPanel('enroll')">➕ Enroll Member</div>
+      <div class="nav-item" onclick="showPanel('lookup')">🔍 Member Lookup</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Points</div>
+      <div class="nav-item" onclick="showPanel('earn')">⬆️ Earn Points</div>
+      <div class="nav-item" onclick="showPanel('redeem')">🎟️ Redeem Points</div>
+      <div class="nav-item" onclick="showPanel('transactions')">📋 Transactions</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Rewards</div>
+      <div class="nav-item" onclick="showPanel('catalogue')">🎁 Reward Catalogue</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Reports</div>
+      <div class="nav-item" onclick="showPanel('reports')">📊 Reports</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-title">Loyalty Programme Dashboard</div>
+      <div class="page-sub">Bonga Points reward system overview</div>
+      <div class="stats-row">
+        <div class="stat orange"><div class="stat-l">Total Members</div><div class="stat-v" id="d-members">0</div><div class="stat-s">Enrolled</div></div>
+        <div class="stat gold"><div class="stat-l">Points Issued</div><div class="stat-v" id="d-issued">0</div><div class="stat-s">Total earned</div></div>
+        <div class="stat green"><div class="stat-l">Points Redeemed</div><div class="stat-v" id="d-redeemed">0</div><div class="stat-s">Total used</div></div>
+        <div class="stat purple"><div class="stat-l">Outstanding</div><div class="stat-v" id="d-outstanding">0</div><div class="stat-s">Live balance</div></div>
+        <div class="stat orange"><div class="stat-l">Redemptions</div><div class="stat-v" id="d-redemptions">0</div><div class="stat-s">Total rewards given</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.25rem">
+        <div class="card" style="padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px">Member Tier Breakdown</div>
+          <div id="tier-breakdown"></div>
+        </div>
+        <div class="card" style="padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px">Top Points Holders</div>
+          <div id="top-members"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">Recent Point Activity</div>
+        <table><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Points</th><th>Description</th><th>Balance</th></tr></thead>
+        <tbody id="dash-tx"></tbody></table>
+      </div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="panel" id="panel-members">
+      <div class="page-title">All Members</div>
+      <div class="page-sub">Complete membership registry</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem">
+        <input id="mem-search" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none" placeholder="Search members…" oninput="renderMembers()"/>
+        <select id="mem-tier-f" onchange="renderMembers()" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px"><option value="">All Tiers</option><option>Bronze</option><option>Silver</option><option>Gold</option><option>Platinum</option></select>
+        <button class="btn btn-primary" onclick="showPanel('enroll')">+ Enroll</button>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Member ID</th><th>Name</th><th>Phone</th><th>Points Balance</th><th>Tier</th><th>Total Earned</th><th>Joined</th></tr></thead>
+        <tbody id="members-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ENROLL -->
+    <div class="panel" id="panel-enroll">
+      <div class="page-title">Enroll New Member</div>
+      <div class="page-sub">Register a customer in the loyalty programme</div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>First Name *</label><input id="en-first" placeholder="e.g. James"/></div>
+          <div class="form-group"><label>Last Name *</label><input id="en-last" placeholder="e.g. Mwangi"/></div>
+          <div class="form-group"><label>Phone *</label><input id="en-phone" placeholder="e.g. 0712001001"/></div>
+          <div class="form-group"><label>Email</label><input id="en-email" placeholder="e.g. james@email.com"/></div>
+          <div class="form-group"><label>ID Number</label><input id="en-id" placeholder="e.g. 23456781"/></div>
+          <div class="form-group"><label>Date of Birth</label><input type="date" id="en-dob"/></div>
+          <div class="form-group"><label>Preferred Contact</label>
+            <select id="en-contact"><option>SMS</option><option>Email</option><option>WhatsApp</option></select>
+          </div>
+          <div class="form-group"><label>Referral Code</label><input id="en-ref" placeholder="Optional"/></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="showPanel('members')">Cancel</button>
+          <button class="btn btn-primary" onclick="enrollMember()">✓ Enroll Member</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOOKUP -->
+    <div class="panel" id="panel-lookup">
+      <div class="page-title">Member Lookup</div>
+      <div class="page-sub">Check member balance and history</div>
+      <div class="card" style="padding:20px">
+        <div style="display:flex;gap:10px;margin-bottom:16px">
+          <input id="lookup-input" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none" placeholder="Member ID, phone number or name…"/>
+          <button class="btn btn-primary" onclick="lookupMember()">Lookup</button>
+        </div>
+        <div id="lookup-result"></div>
+      </div>
+    </div>
+
+    <!-- EARN -->
+    <div class="panel" id="panel-earn">
+      <div class="page-title">Earn Points</div>
+      <div class="page-sub">Award points to a member for a qualifying transaction</div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>Member ID or Phone *</label><input id="earn-member" placeholder="e.g. BNG-001 or 0712001001"/></div>
+          <div class="form-group"><label>Transaction Amount (KES) *</label><input type="number" id="earn-amount" placeholder="e.g. 5000"/></div>
+          <div class="form-group"><label>Earn Category</label>
+            <select id="earn-cat">
+              <option value="1">Standard Purchase (1pt per KES 10)</option>
+              <option value="2">Partner Purchase (2pts per KES 10)</option>
+              <option value="3">Bonus Campaign (3pts per KES 10)</option>
+              <option value="0.5">Fuel Purchase (0.5pt per KES 10)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Reference / Receipt No.</label><input id="earn-ref" placeholder="e.g. RCP-20250622-001"/></div>
+          <div class="form-group full"><label>Description</label><input id="earn-desc" placeholder="e.g. Grocery purchase at Naivas Westlands"/></div>
+        </div>
+        <div id="earn-preview" style="margin-top:12px"></div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="previewEarn()">Preview</button>
+          <button class="btn btn-primary" onclick="awardPoints()">✓ Award Points</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REDEEM -->
+    <div class="panel" id="panel-redeem">
+      <div class="page-title">Redeem Points</div>
+      <div class="page-sub">Process a reward redemption for a member</div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>Member ID *</label><input id="red-member" placeholder="e.g. BNG-001"/></div>
+          <div class="form-group"><label>Select Reward *</label><select id="red-reward"></select></div>
+        </div>
+        <div id="redeem-preview" style="margin-top:12px"></div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="previewRedeem()">Check Eligibility</button>
+          <button class="btn btn-primary" onclick="processRedeem()">✓ Process Redemption</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="panel" id="panel-transactions">
+      <div class="page-title">Points Transactions</div>
+      <div class="page-sub">Full history of all point movements</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem">
+        <select id="tx-type-f" onchange="renderTransactions()" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px"><option value="">All Types</option><option>Earned</option><option>Redeemed</option><option>Bonus</option><option>Expired</option></select>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Points</th><th>Description</th><th>Balance After</th></tr></thead>
+        <tbody id="tx-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- CATALOGUE -->
+    <div class="panel" id="panel-catalogue">
+      <div class="page-title">Reward Catalogue</div>
+      <div class="page-sub">Available rewards for redemption</div>
+      <div class="rewards-grid" id="rewards-grid"></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="panel" id="panel-reports">
+      <div class="page-title">Programme Reports</div>
+      <div class="page-sub">Analytics and reporting</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:1.5rem">
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('members')"><div style="font-size:22px;margin-bottom:6px">👥</div><div style="font-weight:600;margin-bottom:3px">Member Report</div><div style="font-size:12px;color:var(--muted)">All members with balances and tiers</div></div>
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('points')"><div style="font-size:22px;margin-bottom:6px">📊</div><div style="font-weight:600;margin-bottom:3px">Points Summary</div><div style="font-size:12px;color:var(--muted)">Issued vs redeemed analytics</div></div>
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('top')"><div style="font-size:22px;margin-bottom:6px">🏆</div><div style="font-weight:600;margin-bottom:3px">Top Members</div><div style="font-size:12px;color:var(--muted)">Leaderboard by points earned</div></div>
+      </div>
+      <div id="rpt-out" style="display:none">
+        <div class="card-hdr" style="background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;padding:10px 14px;display:flex;justify-content:space-between">
+          <span style="font-weight:600" id="rpt-title"></span>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('rpt-out').style.display='none'">Close</button>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;white-space:pre-wrap;max-height:400px;overflow-y:auto;color:var(--text)" id="rpt-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const TIERS={Bronze:{min:0,max:999,color:'#CD7F32'},Silver:{min:1000,max:4999,color:'#C0C0C0'},Gold:{min:5000,max:19999,color:'#D97706'},Platinum:{min:20000,max:Infinity,color:'#7C3AED'}};
+function getTier(pts){for(const[t,d]of Object.entries(TIERS))if(pts>=d.min&&pts<=d.max)return t;return 'Bronze'}
+function tierBadge(t){const colors={Bronze:'badge-orange',Silver:'badge-gold',Gold:'badge-gold',Platinum:'badge-purple'};return `<span class="badge ${colors[t]||'badge-orange'}">${t}</span>`}
+
+const REWARDS=[
+  {id:'RWD-001',name:'Airtime KES 50',icon:'📱',pts:100,cat:'Airtime'},
+  {id:'RWD-002',name:'Airtime KES 200',icon:'📱',pts:400,cat:'Airtime'},
+  {id:'RWD-003',name:'Safaricom Data 1GB',icon:'🌐',pts:300,cat:'Data'},
+  {id:'RWD-004',name:'Netflix 1-Month',icon:'🎬',pts:2000,cat:'Entertainment'},
+  {id:'RWD-005',name:'Naivas Voucher KES 500',icon:'🛒',pts:1000,cat:'Shopping'},
+  {id:'RWD-006',name:'Naivas Voucher KES 1000',icon:'🛒',pts:1800,cat:'Shopping'},
+  {id:'RWD-007',name:'Kenya Airways Miles',icon:'✈️',pts:5000,cat:'Travel'},
+  {id:'RWD-008',name:'Java House Meal',icon:'☕',pts:800,cat:'Dining'},
+  {id:'RWD-009',name:'Fuel KES 500 Voucher',icon:'⛽',pts:1200,cat:'Fuel'},
+  {id:'RWD-010',name:'Cash Equivalent KES 100',icon:'💵',pts:250,cat:'Cash'},
+];
+
+let members=[
+  {id:'BNG-001',first:'James',last:'Mwangi',phone:'0712001001',email:'james@demo.com',idNo:'23456781',points:8450,totalEarned:12300,joined:'2024-01-15',contact:'SMS'},
+  {id:'BNG-002',first:'Fatuma',last:'Hassan',phone:'0723002002',email:'fatuma@demo.com',idNo:'34567892',points:1200,totalEarned:3400,joined:'2024-02-20',contact:'Email'},
+  {id:'BNG-003',first:'David',last:'Otieno',phone:'0700003003',email:'david@demo.com',idNo:'45678903',points:24500,totalEarned:31000,joined:'2023-11-10',contact:'WhatsApp'},
+  {id:'BNG-004',first:'Winnie',last:'Kamau',phone:'0711004004',email:'winnie@demo.com',idNo:'56789014',points:450,totalEarned:1200,joined:'2024-05-01',contact:'SMS'},
+  {id:'BNG-005',first:'Brian',last:'Mutua',phone:'0722005005',email:'brian@demo.com',idNo:'67890125',points:5800,totalEarned:9700,joined:'2024-03-08',contact:'SMS'},
+];
+
+let transactions=[
+  {date:'2025-06-22',memberId:'BNG-001',type:'Earned',pts:250,desc:'Grocery purchase at Naivas',balAfter:8450},
+  {date:'2025-06-20',memberId:'BNG-003',type:'Redeemed',pts:-2000,desc:'Netflix 1-Month',balAfter:24500},
+  {date:'2025-06-18',memberId:'BNG-002',type:'Earned',pts:150,desc:'Fuel purchase — Total Energies',balAfter:1200},
+  {date:'2025-06-15',memberId:'BNG-005',type:'Bonus',pts:500,desc:'Birthday bonus',balAfter:5800},
+  {date:'2025-06-10',memberId:'BNG-001',type:'Redeemed',pts:-1000,desc:'Naivas Voucher KES 500',balAfter:8200},
+];
+let memberCounter=6;
+
+function fmt(n){return Number(n).toLocaleString()}
+function today(){return new Date().toISOString().split('T')[0]}
+function getMember(query){const q=query.toLowerCase().trim();return members.find(m=>m.id.toLowerCase()===q||m.phone===q||`${m.first} ${m.last}`.toLowerCase().includes(q))}
+function getMemberName(id){const m=members.find(x=>x.id===id);return m?`${m.first} ${m.last}`:id}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelector(`[onclick="showPanel('${name}')"]`)?.classList.add('active');
+  const map={dashboard:renderDashboard,members:renderMembers,transactions:renderTransactions,catalogue:renderCatalogue,redeem:populateRedeemSelect};
+  if(map[name])map[name]();
+}
+
+function renderDashboard(){
+  const totalIssued=transactions.filter(t=>t.pts>0).reduce((s,t)=>s+t.pts,0);
+  const totalRedeemed=Math.abs(transactions.filter(t=>t.pts<0).reduce((s,t)=>s+t.pts,0));
+  const outstanding=members.reduce((s,m)=>s+m.points,0);
+  document.getElementById('d-members').textContent=members.length;
+  document.getElementById('d-issued').textContent=fmt(totalIssued);
+  document.getElementById('d-redeemed').textContent=fmt(totalRedeemed);
+  document.getElementById('d-outstanding').textContent=fmt(outstanding);
+  document.getElementById('d-redemptions').textContent=transactions.filter(t=>t.pts<0).length;
+
+  // Tier breakdown
+  const tierCounts={Bronze:0,Silver:0,Gold:0,Platinum:0};
+  members.forEach(m=>tierCounts[getTier(m.points)]++);
+  document.getElementById('tier-breakdown').innerHTML=Object.entries(tierCounts).map(([t,c])=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:${TIERS[t].color}"></div>${tierBadge(t)}</div>
+      <span style="font-weight:600;font-size:13px">${c} member${c!==1?'s':''}</span>
+    </div>`).join('');
+
+  // Top members
+  const top=[...members].sort((a,b)=>b.points-a.points).slice(0,5);
+  document.getElementById('top-members').innerHTML=top.map((m,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--dim);width:16px">${i+1}.</span><span style="font-size:13px;font-weight:500">${m.first} ${m.last}</span></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--orange);font-weight:600">${fmt(m.points)} pts</span>
+    </div>`).join('');
+
+  // Recent tx
+  document.getElementById('dash-tx').innerHTML=transactions.slice(0,6).map(t=>`
+    <tr><td>${t.date}</td><td>${getMemberName(t.memberId)}</td>
+    <td><span class="badge badge-${t.type==='Earned'||t.type==='Bonus'?'green':t.type==='Redeemed'?'orange':'red'}">${t.type}</span></td>
+    <td style="color:${t.pts>0?'var(--green)':'var(--red)';font-weight:600}">${t.pts>0?'+':''${t.pts}}</td>
+    <td style="color:var(--muted)">${t.desc}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${fmt(t.balAfter)}</td></tr>`).join('');
+}
+
+// Fix template literal issue
+function renderDashboard(){
+  const totalIssued=transactions.filter(t=>t.pts>0).reduce((s,t)=>s+t.pts,0);
+  const totalRedeemed=Math.abs(transactions.filter(t=>t.pts<0).reduce((s,t)=>s+t.pts,0));
+  const outstanding=members.reduce((s,m)=>s+m.points,0);
+  document.getElementById('d-members').textContent=members.length;
+  document.getElementById('d-issued').textContent=fmt(totalIssued);
+  document.getElementById('d-redeemed').textContent=fmt(totalRedeemed);
+  document.getElementById('d-outstanding').textContent=fmt(outstanding);
+  document.getElementById('d-redemptions').textContent=transactions.filter(t=>t.pts<0).length;
+  const tierCounts={Bronze:0,Silver:0,Gold:0,Platinum:0};
+  members.forEach(m=>tierCounts[getTier(m.points)]++);
+  document.getElementById('tier-breakdown').innerHTML=Object.entries(tierCounts).map(([t,c])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">${tierBadge(t)}<span style="font-weight:600;font-size:13px">${c}</span></div>`).join('');
+  const top=[...members].sort((a,b)=>b.points-a.points).slice(0,5);
+  document.getElementById('top-members').innerHTML=top.map((m,i)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px">${i+1}. ${m.first} ${m.last}</span><span style="color:var(--orange);font-weight:600;font-size:12px">${fmt(m.points)} pts</span></div>`).join('');
+  document.getElementById('dash-tx').innerHTML=transactions.slice(0,6).map(t=>`<tr><td>${t.date}</td><td>${getMemberName(t.memberId)}</td><td><span class="badge badge-${t.pts>0?'green':'orange'}">${t.type}</span></td><td style="color:${t.pts>0?'#059669':'#DC2626'};font-weight:600">${t.pts>0?'+':''}${t.pts}</td><td style="color:var(--muted)">${t.desc}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px">${fmt(t.balAfter)}</td></tr>`).join('');
+}
+
+function renderMembers(){
+  const q=(document.getElementById('mem-search')?.value||'').toLowerCase();
+  const tf=document.getElementById('mem-tier-f')?.value||'';
+  const filtered=members.filter(m=>{const t=getTier(m.points);return(!q||`${m.first} ${m.last} ${m.id} ${m.phone}`.toLowerCase().includes(q))&&(!tf||t===tf)});
+  document.getElementById('members-table').innerHTML=filtered.map(m=>`<tr><td><code style="font-size:11px;color:var(--orange)">${m.id}</code></td><td><strong>${m.first} ${m.last}</strong></td><td>${m.phone}</td><td style="font-weight:700;color:var(--orange)">${fmt(m.points)}</td><td>${tierBadge(getTier(m.points))}</td><td>${fmt(m.totalEarned)}</td><td>${m.joined}</td></tr>`).join('');
+}
+
+function enrollMember(){
+  const first=document.getElementById('en-first').value.trim();
+  const last=document.getElementById('en-last').value.trim();
+  const phone=document.getElementById('en-phone').value.trim();
+  if(!first||!last||!phone){toast('Fill all required fields');return;}
+  if(members.find(m=>m.phone===phone)){toast('Phone already enrolled');return;}
+  const id='BNG-00'+String(memberCounter++).padStart(3,'0');
+  members.push({id,first,last,phone,email:document.getElementById('en-email').value,idNo:document.getElementById('en-id').value,points:100,totalEarned:100,joined:today(),contact:document.getElementById('en-contact').value});
+  transactions.unshift({date:today(),memberId:id,type:'Bonus',pts:100,desc:'Welcome bonus — new member',balAfter:100});
+  ['en-first','en-last','en-phone','en-email','en-id'].forEach(i=>document.getElementById(i).value='');
+  toast(first+' '+last+' enrolled! 100 welcome points awarded.');showPanel('members');
+}
+
+function lookupMember(){
+  const q=document.getElementById('lookup-input').value.trim();
+  const m=getMember(q);const out=document.getElementById('lookup-result');
+  if(!m){out.innerHTML='<div style="color:var(--red);font-size:13px">Member not found.</div>';return;}
+  const mTx=transactions.filter(t=>t.memberId===m.id);
+  const tier=getTier(m.points);
+  const nextTier=Object.entries(TIERS).find(([,d])=>d.min>m.points);
+  out.innerHTML=`<div class="member-card"><div class="mc-tier">${tier}</div><div class="mc-name">${m.first} ${m.last}</div><div class="mc-id">${m.id} · ${m.phone}</div><div class="mc-points">${fmt(m.points)}</div><div class="mc-points-label">BONGA POINTS</div></div>
+    ${nextTier?`<div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Next tier: <strong>${nextTier[0]}</strong> — need ${fmt(nextTier[1].min-m.points)} more points</div>`:'<div style="font-size:12px;color:var(--purple);font-weight:600;margin-bottom:1rem">🏆 Platinum Member — highest tier!</div>'}
+    <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px">RECENT TRANSACTIONS</div>
+    ${mTx.slice(0,5).map(t=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${t.date} · ${t.desc}</span><span style="font-weight:600;color:${t.pts>0?'var(--green)':'var(--red)'}">${t.pts>0?'+':''}${t.pts}</span></div>`).join('')||'<div style="color:var(--muted);font-size:13px">No transactions.</div>'}`;
+}
+
+function previewEarn(){
+  const query=document.getElementById('earn-member').value.trim();
+  const amount=Number(document.getElementById('earn-amount').value);
+  const rate=Number(document.getElementById('earn-cat').value);
+  const m=getMember(query);
+  const pts=Math.floor((amount/10)*rate);
+  document.getElementById('earn-preview').innerHTML=m&&amount?`<div style="background:var(--orange-dim);border:1px solid rgba(234,88,12,0.2);border-radius:var(--radius-sm);padding:12px;font-size:13px"><strong>${m.first} ${m.last}</strong> · Current: ${fmt(m.points)} pts<br>Transaction: KES ${fmt(amount)} → +<strong>${fmt(pts)} points</strong> · New balance: <strong>${fmt(m.points+pts)} pts</strong></div>`:(m?'<div style="color:var(--red);font-size:13px">Enter amount.</div>':'<div style="color:var(--red);font-size:13px">Member not found.</div>');
+}
+
+function awardPoints(){
+  const query=document.getElementById('earn-member').value.trim();
+  const amount=Number(document.getElementById('earn-amount').value);
+  const rate=Number(document.getElementById('earn-cat').value);
+  const m=getMember(query);
+  if(!m){toast('Member not found');return;}
+  if(!amount){toast('Enter transaction amount');return;}
+  const pts=Math.floor((amount/10)*rate);
+  m.points+=pts;m.totalEarned+=pts;
+  transactions.unshift({date:today(),memberId:m.id,type:'Earned',pts,desc:document.getElementById('earn-desc').value||`Purchase KES ${fmt(amount)}`,balAfter:m.points});
+  ['earn-member','earn-amount','earn-desc','earn-ref'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('earn-preview').innerHTML='';
+  toast('+'+fmt(pts)+' points awarded to '+m.first);
+}
+
+function populateRedeemSelect(){
+  document.getElementById('red-reward').innerHTML=REWARDS.map(r=>`<option value="${r.id}">${r.name} — ${fmt(r.pts)} pts</option>`).join('');
+}
+
+function previewRedeem(){
+  const query=document.getElementById('red-member').value.trim();
+  const rid=document.getElementById('red-reward').value;
+  const m=getMember(query);const r=REWARDS.find(x=>x.id===rid);
+  const out=document.getElementById('redeem-preview');
+  if(!m||!r){out.innerHTML='<div style="color:var(--red);font-size:13px">Member or reward not found.</div>';return;}
+  const ok=m.points>=r.pts;
+  out.innerHTML=`<div style="background:${ok?'var(--green-dim)':'var(--red-dim)'};border:1px solid ${ok?'#A7F3D0':'#FECACA'};border-radius:var(--radius-sm);padding:12px;font-size:13px">
+    <strong>${m.first} ${m.last}</strong> · Balance: ${fmt(m.points)} pts<br>
+    Reward: ${r.icon} ${r.name} · Cost: ${fmt(r.pts)} pts<br>
+    ${ok?`<strong style="color:var(--green)">✓ Eligible — balance after: ${fmt(m.points-r.pts)} pts</strong>`:`<strong style="color:var(--red)">✗ Insufficient points — need ${fmt(r.pts-m.points)} more</strong>`}
+  </div>`;
+}
+
+function processRedeem(){
+  const query=document.getElementById('red-member').value.trim();
+  const rid=document.getElementById('red-reward').value;
+  const m=getMember(query);const r=REWARDS.find(x=>x.id===rid);
+  if(!m){toast('Member not found');return;}
+  if(!r){toast('Select a reward');return;}
+  if(m.points<r.pts){toast('Insufficient points');return;}
+  m.points-=r.pts;
+  transactions.unshift({date:today(),memberId:m.id,type:'Redeemed',pts:-r.pts,desc:r.name,balAfter:m.points});
+  document.getElementById('redeem-preview').innerHTML=`<div style="background:var(--green-dim);border:1px solid #A7F3D0;border-radius:var(--radius-sm);padding:12px;font-size:13px"><strong style="color:var(--green)">✓ Redemption successful!</strong><br>${r.icon} ${r.name} issued to ${m.first} ${m.last}<br>Points used: ${fmt(r.pts)} · New balance: ${fmt(m.points)} pts</div>`;
+  toast(r.name+' redeemed for '+m.first);
+}
+
+function renderTransactions(){
+  const tf=document.getElementById('tx-type-f')?.value||'';
+  const filtered=transactions.filter(t=>!tf||t.type===tf);
+  document.getElementById('tx-table').innerHTML=filtered.map(t=>`<tr><td>${t.date}</td><td>${getMemberName(t.memberId)}</td><td><span class="badge badge-${t.pts>0?'green':'orange'}">${t.type}</span></td><td style="font-weight:600;color:${t.pts>0?'#059669':'#DC2626'}">${t.pts>0?'+':''}${t.pts}</td><td style="color:var(--muted)">${t.desc}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px">${fmt(t.balAfter)}</td></tr>`).join('');
+}
+
+function renderCatalogue(){
+  document.getElementById('rewards-grid').innerHTML=REWARDS.map(r=>`<div class="reward-card" onclick="showPanel('redeem')"><div class="reward-icon">${r.icon}</div><div class="reward-name">${r.name}</div><div class="reward-pts">${fmt(r.pts)} pts</div><div class="reward-cat">${r.cat}</div></div>`).join('');
+}
+
+function genReport(type){
+  const out=document.getElementById('rpt-out');out.style.display='block';
+  const now=new Date().toLocaleString();const pad=(s,n)=>String(s).padEnd(n);
+  if(type==='members'){
+    document.getElementById('rpt-title').textContent='Member Report';
+    document.getElementById('rpt-content').textContent=`BONGA POINTS — MEMBER REPORT\nGenerated: ${now}\n${'─'.repeat(80)}\n\n${pad('ID',10)}${pad('NAME',22)}${pad('PHONE',14)}${pad('BALANCE',10)}${'TIER'.padEnd(12)}${'TOTAL EARNED'}\n${'─'.repeat(80)}\n${members.map(m=>`${pad(m.id,10)}${pad(m.first+' '+m.last,22)}${pad(m.phone,14)}${pad(fmt(m.points),10)}${pad(getTier(m.points),12)}${fmt(m.totalEarned)}`).join('\n')}\n\nTotal Members: ${members.length}`;
+  } else if(type==='points'){
+    const issued=transactions.filter(t=>t.pts>0).reduce((s,t)=>s+t.pts,0);
+    const redeemed=Math.abs(transactions.filter(t=>t.pts<0).reduce((s,t)=>s+t.pts,0));
+    document.getElementById('rpt-title').textContent='Points Summary';
+    document.getElementById('rpt-content').textContent=`BONGA POINTS — PROGRAMME SUMMARY\nGenerated: ${now}\n${'─'.repeat(60)}\n\nTotal Points Issued:    ${fmt(issued)}\nTotal Points Redeemed:  ${fmt(redeemed)}\nOutstanding Balance:    ${fmt(issued-redeemed)}\nRedemption Rate:        ${issued?Math.round((redeemed/issued)*100):0}%\nActive Members:         ${members.length}\nTotal Transactions:     ${transactions.length}`;
+  } else {
+    const top=[...members].sort((a,b)=>b.totalEarned-a.totalEarned).slice(0,10);
+    document.getElementById('rpt-title').textContent='Top Members Leaderboard';
+    document.getElementById('rpt-content').textContent=`BONGA POINTS — TOP MEMBERS\nGenerated: ${now}\n${'─'.repeat(60)}\n\n${top.map((m,i)=>`${String(i+1).padStart(2,'0')}. ${m.first+' '+m.last} (${m.id})\n    Balance: ${fmt(m.points)} pts  |  Total Earned: ${fmt(m.totalEarned)} pts  |  Tier: ${getTier(m.points)}`).join('\n\n')}`;
+  }
+  toast('Report generated');
+}
+
+// INIT
+renderDashboard();populateRedeemSelect();
+</script>
+</body>
+</html>

@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Amiable Insurance — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#6D28D9;--purple-light:#7C3AED;--purple-pale:#EDE9FE;
+  --white:#FFFFFF;--bg:#F5F3FF;--surface:#FFFFFF;
+  --border:#DDD6FE;--text:#1E1B4B;--muted:#6B7280;--dim:#9CA3AF;
+  --green:#059669;--green-bg:#D1FAE5;--red:#DC2626;--red-bg:#FEE2E2;
+  --amber:#D97706;--amber-bg:#FEF3C7;--blue:#2563EB;--blue-bg:#DBEAFE;
+  --radius:10px;--radius-sm:6px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;min-height:100vh}
+
+/* ── TOP BAR ── */
+.topbar{
+  background:var(--purple-light);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.5rem;height:52px;position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 8px rgba(109,40,217,0.3);
+}
+.topbar-logo{font-weight:700;font-size:16px;display:flex;align-items:center;gap:10px}
+.topbar-logo span{font-size:20px}
+.topbar-right{display:flex;align-items:center;gap:1rem;font-size:13px}
+.demo-badge{
+  background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);
+  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.06em;
+}
+.back-link{color:rgba(255,255,255,0.8);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:5px}
+.back-link:hover{color:#fff}
+
+/* ── LAYOUT ── */
+.app-shell{display:flex;height:calc(100vh - 52px)}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:220px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;
+}
+.sidebar-section{padding:12px 0}
+.sidebar-label{
+  font-size:10px;font-weight:600;color:var(--dim);letter-spacing:0.1em;
+  text-transform:uppercase;padding:0 16px 8px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px;cursor:pointer;color:var(--muted);
+  font-size:13px;font-weight:500;transition:all 0.15s;border-left:3px solid transparent;
+}
+.nav-item:hover{background:var(--purple-pale);color:var(--purple-light)}
+.nav-item.active{background:var(--purple-pale);color:var(--purple-light);border-left-color:var(--purple-light)}
+.nav-item .ni-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-user{
+  margin-top:auto;padding:12px 16px;border-top:1px solid var(--border);
+  font-size:12px;color:var(--muted);
+}
+.sidebar-user strong{display:block;color:var(--text);font-size:13px}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:1.5rem}
+
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:1.5rem}
+.page-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:2px}
+.page-sub{font-size:13px;color:var(--muted)}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+}
+.stat-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:700;color:var(--text);line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.stat-card.purple{border-left:3px solid var(--purple-light)}
+.stat-card.green{border-left:3px solid var(--green)}
+.stat-card.amber{border-left:3px solid var(--amber)}
+.stat-card.blue{border-left:3px solid var(--blue)}
+
+/* ── TABLE CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-bottom:1px solid var(--border);
+}
+.card-title{font-weight:600;font-size:14px}
+.card-actions{display:flex;gap:8px}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;
+  font-weight:500;cursor:pointer;border:none;display:inline-flex;
+  align-items:center;gap:6px;font-family:'Inter',sans-serif;transition:all 0.15s;
+}
+.btn-primary{background:var(--purple-light);color:#fff}
+.btn-primary:hover{background:var(--purple)}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--purple-light);color:var(--purple-light)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid #FECACA}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid #A7F3D0}
+
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;padding:10px 14px;text-align:left;background:#FAFAFA;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid #F3F4F6;font-size:13px;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFAF9}
+
+/* ── BADGES ── */
+.badge{padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-purple{background:var(--purple-pale);color:var(--purple-light)}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:500;color:var(--muted)}
+input,select,textarea{
+  padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);
+  font-size:13px;font-family:'Inter',sans-serif;color:var(--text);
+  background:#fff;transition:border-color 0.15s;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--purple-light);box-shadow:0 0 0 3px rgba(124,58,237,0.1)}
+textarea{resize:vertical;min-height:80px}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.4);
+  display:none;align-items:center;justify-content:center;z-index:500;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:#fff;border-radius:var(--radius);
+  width:min(560px,95vw);max-height:85vh;overflow-y:auto;
+  padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:#1E1B4B;color:#fff;
+  padding:12px 20px;border-radius:var(--radius);
+  font-size:13px;font-weight:500;z-index:1000;
+  transform:translateY(80px);opacity:0;transition:all 0.3s;
+  display:flex;align-items:center;gap:10px;max-width:340px;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{font-size:16px}
+
+/* ── SEARCH BAR ── */
+.search-bar{
+  display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap;
+}
+.search-input{
+  flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--border);
+  border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;
+  outline:none;
+}
+.search-input:focus{border-color:var(--purple-light)}
+
+/* ── REPORT AREA ── */
+.report-box{
+  background:#FAFAFA;border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  line-height:1.9;color:var(--text);white-space:pre-wrap;max-height:400px;overflow-y:auto;
+}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:3rem;color:var(--dim)}
+.empty-icon{font-size:3rem;margin-bottom:0.5rem}
+.empty p{font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo"><span>🛡️</span> Amiable Insurance System</div>
+  <div class="topbar-right">
+    <span class="demo-badge">DEMO MODE</span>
+    <a href="../index.html" class="back-link">← Back to Portfolio</a>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Dashboard</div>
+      <div class="nav-item active" onclick="showPanel('dashboard')"><span class="ni-icon">🏠</span> Overview</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Members</div>
+      <div class="nav-item" onclick="showPanel('member-list')"><span class="ni-icon">👥</span> Member List</div>
+      <div class="nav-item" onclick="showPanel('member-capture')"><span class="ni-icon">➕</span> Capture Member</div>
+      <div class="nav-item" onclick="showPanel('member-search')"><span class="ni-icon">🔍</span> Member Search</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Claims</div>
+      <div class="nav-item" onclick="showPanel('claims-list')"><span class="ni-icon">📋</span> All Claims</div>
+      <div class="nav-item" onclick="showPanel('new-claim')"><span class="ni-icon">📝</span> File New Claim</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Reports</div>
+      <div class="nav-item" onclick="showPanel('reports-member')"><span class="ni-icon">📊</span> Member Reports</div>
+      <div class="nav-item" onclick="showPanel('reports-receipts')"><span class="ni-icon">🧾</span> Receipt Reports</div>
+      <div class="nav-item" onclick="showPanel('reports-underwriter')"><span class="ni-icon">📤</span> Underwriter</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Settings</div>
+      <div class="nav-item" onclick="showPanel('agents')"><span class="ni-icon">🧑‍💼</span> Agents</div>
+    </div>
+    <div class="sidebar-user">
+      <strong>Admin User</strong>
+      Amiable Insurance · Demo
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main" id="main-content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-header">
+        <div class="page-title">Dashboard Overview</div>
+        <div class="page-sub">Welcome back. Here's your system summary.</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card purple">
+          <div class="stat-label">Total Members</div>
+          <div class="stat-val" id="stat-members">0</div>
+          <div class="stat-sub">Registered this month</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Active Policies</div>
+          <div class="stat-val" id="stat-active">0</div>
+          <div class="stat-sub">In good standing</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-label">Open Claims</div>
+          <div class="stat-val" id="stat-claims">0</div>
+          <div class="stat-sub">Awaiting processing</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Premiums (KES)</div>
+          <div class="stat-val" id="stat-premiums">0</div>
+          <div class="stat-sub">This month</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Members</span>
+          <button class="btn btn-outline btn-sm" onclick="showPanel('member-list')">View All</button>
+        </div>
+        <table>
+          <thead><tr><th>Member ID</th><th>Name</th><th>Policy</th><th>Premium (KES)</th><th>Status</th></tr></thead>
+          <tbody id="dashboard-recent"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Recent Claims</span><button class="btn btn-outline btn-sm" onclick="showPanel('claims-list')">View All</button></div>
+        <table>
+          <thead><tr><th>Claim No.</th><th>Member</th><th>Type</th><th>Amount (KES)</th><th>Status</th></tr></thead>
+          <tbody id="dashboard-claims"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── MEMBER LIST ── -->
+    <div class="panel" id="panel-member-list">
+      <div class="page-header">
+        <div class="page-title">Member List</div>
+        <div class="page-sub">All registered members</div>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" id="member-search-input" placeholder="Search by name, ID or phone…" oninput="filterMembers()"/>
+        <button class="btn btn-primary" onclick="showPanel('member-capture')">+ Add Member</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Member ID</th><th>Full Name</th><th>ID No.</th><th>Phone</th><th>Policy</th><th>Premium</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="member-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── MEMBER CAPTURE ── -->
+    <div class="panel" id="panel-member-capture">
+      <div class="page-header">
+        <div class="page-title">Capture New Member</div>
+        <div class="page-sub">Complete all required fields and submit to register.</div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>First Name *</label><input id="cap-first" placeholder="e.g. James"/></div>
+          <div class="form-group"><label>Last Name *</label><input id="cap-last" placeholder="e.g. Mwangi"/></div>
+          <div class="form-group"><label>National ID No. *</label><input id="cap-id" placeholder="e.g. 12345678"/></div>
+          <div class="form-group"><label>Date of Birth *</label><input type="date" id="cap-dob"/></div>
+          <div class="form-group"><label>Phone Number *</label><input id="cap-phone" placeholder="e.g. 0712345678"/></div>
+          <div class="form-group"><label>Alternative Number</label><input id="cap-phone2" placeholder="Optional"/></div>
+          <div class="form-group"><label>Email Address</label><input id="cap-email" placeholder="Optional"/></div>
+          <div class="form-group"><label>Gender</label>
+            <select id="cap-gender"><option>Male</option><option>Female</option><option>Other</option></select>
+          </div>
+          <div class="form-group"><label>Policy Type *</label>
+            <select id="cap-policy">
+              <option>Individual</option><option>Family</option><option>Group</option><option>Corporate</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Monthly Premium (KES) *</label><input id="cap-premium" type="number" placeholder="e.g. 2500"/></div>
+          <div class="form-group"><label>Agent</label>
+            <select id="cap-agent"></select>
+          </div>
+          <div class="form-group"><label>Start Date *</label><input type="date" id="cap-start"/></div>
+          <div class="form-group full"><label>Physical Address</label><input id="cap-address" placeholder="e.g. Westlands, Nairobi"/></div>
+          <div class="form-group full"><label>Beneficiary Name</label><input id="cap-bene" placeholder="e.g. Jane Mwangi (Spouse)"/></div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="showPanel('member-list')">Cancel</button>
+          <button class="btn btn-primary" onclick="captureMember()">✓ Submit &amp; Register Member</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MEMBER SEARCH ── -->
+    <div class="panel" id="panel-member-search">
+      <div class="page-header">
+        <div class="page-title">Member Search &amp; Enquiry</div>
+        <div class="page-sub">Search by Member ID, National ID or phone number.</div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="display:flex;gap:10px;margin-bottom:20px">
+          <input id="enquiry-input" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none" placeholder="Enter Member ID, National ID or phone number…"/>
+          <button class="btn btn-primary" onclick="enquireMember()">Search</button>
+        </div>
+        <div id="enquiry-result"></div>
+      </div>
+    </div>
+
+    <!-- ── CLAIMS LIST ── -->
+    <div class="panel" id="panel-claims-list">
+      <div class="page-header">
+        <div class="page-title">Claims Management</div>
+        <div class="page-sub">All filed claims and their current status.</div>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" id="claim-filter" placeholder="Search by member or claim type…" oninput="filterClaims()"/>
+        <button class="btn btn-primary" onclick="showPanel('new-claim')">+ File New Claim</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Claim No.</th><th>Member</th><th>Type</th><th>Amount (KES)</th><th>Date Filed</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="claims-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── NEW CLAIM ── -->
+    <div class="panel" id="panel-new-claim">
+      <div class="page-header">
+        <div class="page-title">File New Claim</div>
+        <div class="page-sub">Complete the claim form and submit for processing.</div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>Member ID *</label><input id="cl-member-id" placeholder="e.g. MBR-001"/></div>
+          <div class="form-group"><label>Claim Type *</label>
+            <select id="cl-type">
+              <option>Hospitalization</option><option>Outpatient</option><option>Maternity</option>
+              <option>Dental</option><option>Optical</option><option>Surgery</option><option>Death Benefit</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Hospital / Provider</label><input id="cl-hospital" placeholder="e.g. Aga Khan Hospital, Nairobi"/></div>
+          <div class="form-group"><label>Date of Service *</label><input type="date" id="cl-date"/></div>
+          <div class="form-group"><label>Claim Amount (KES) *</label><input type="number" id="cl-amount" placeholder="e.g. 45000"/></div>
+          <div class="form-group"><label>Supporting Documents</label>
+            <select id="cl-docs">
+              <option>Medical Report + Invoice</option><option>Discharge Summary</option>
+              <option>Doctor's Note + Receipts</option><option>Death Certificate</option>
+            </select>
+          </div>
+          <div class="form-group full"><label>Description / Notes</label><textarea id="cl-notes" placeholder="Briefly describe the nature of the claim…"></textarea></div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="showPanel('claims-list')">Cancel</button>
+          <button class="btn btn-primary" onclick="fileClaim()">Submit Claim</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MEMBER REPORTS ── -->
+    <div class="panel" id="panel-reports-member">
+      <div class="page-header">
+        <div class="page-title">Member Reports</div>
+        <div class="page-sub">Generate membership-related reports.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:1.5rem">
+        <div class="card" style="padding:16px;cursor:pointer" onclick="generateReport('captured')">
+          <div style="font-size:24px;margin-bottom:8px">📋</div>
+          <div style="font-weight:600;margin-bottom:4px">Members Captured</div>
+          <div style="font-size:12px;color:var(--muted)">List of all registered members with agent and date filters</div>
+        </div>
+        <div class="card" style="padding:16px;cursor:pointer" onclick="generateReport('status')">
+          <div style="font-size:24px;margin-bottom:8px">📊</div>
+          <div style="font-weight:600;margin-bottom:4px">Member Status Report</div>
+          <div style="font-size:12px;color:var(--muted)">Active, lapsed, and suspended member breakdown</div>
+        </div>
+        <div class="card" style="padding:16px;cursor:pointer" onclick="generateReport('nonpay')">
+          <div style="font-size:24px;margin-bottom:8px">⚠️</div>
+          <div style="font-weight:600;margin-bottom:4px">Non-Payment Report</div>
+          <div style="font-size:12px;color:var(--muted)">Members with overdue premium payments</div>
+        </div>
+        <div class="card" style="padding:16px;cursor:pointer" onclick="generateReport('listing')">
+          <div style="font-size:24px;margin-bottom:8px">📁</div>
+          <div style="font-weight:600;margin-bottom:4px">Member Listing</div>
+          <div style="font-size:12px;color:var(--muted)">Full extract with biodata, premium and policy details</div>
+        </div>
+      </div>
+      <div id="report-output" style="display:none">
+        <div class="card-header" style="background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:600" id="report-title"></span>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('report-output').style.display='none'">Close</button>
+        </div>
+        <div class="report-box" id="report-content"></div>
+      </div>
+    </div>
+
+    <!-- ── RECEIPT REPORTS ── -->
+    <div class="panel" id="panel-reports-receipts">
+      <div class="page-header">
+        <div class="page-title">Receipt Reports</div>
+        <div class="page-sub">Payment and receipting records.</div>
+      </div>
+      <div class="card" style="padding:20px;margin-bottom:1rem">
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+          <div class="form-group"><label>From Date</label><input type="date" id="rec-from"/></div>
+          <div class="form-group"><label>To Date</label><input type="date" id="rec-to"/></div>
+          <div class="form-group"><label>Agent</label><select id="rec-agent"><option value="">All Agents</option></select></div>
+          <button class="btn btn-primary" onclick="generateReceiptReport()">Generate Report</button>
+        </div>
+      </div>
+      <div id="receipt-report-output"></div>
+    </div>
+
+    <!-- ── UNDERWRITER REPORTS ── -->
+    <div class="panel" id="panel-reports-underwriter">
+      <div class="page-header">
+        <div class="page-title">Underwriter Reports</div>
+        <div class="page-sub">Monthly payment lists for submission to the underwriter.</div>
+      </div>
+      <div class="card" style="padding:20px;margin-bottom:1rem">
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+          <div class="form-group"><label>Select Month</label>
+            <select id="uw-month">
+              <option>January 2025</option><option>February 2025</option><option>March 2025</option>
+              <option>April 2025</option><option>May 2025</option><option selected>June 2025</option>
+              <option>July 2025</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="generateUWReport()">Generate Monthly List</button>
+        </div>
+      </div>
+      <div id="uw-report-output"></div>
+    </div>
+
+    <!-- ── AGENTS ── -->
+    <div class="panel" id="panel-agents">
+      <div class="page-header">
+        <div class="page-title">Agent Management</div>
+        <div class="page-sub">View and manage sales agents.</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Registered Agents</span></div>
+        <table>
+          <thead><tr><th>Agent Code</th><th>Name</th><th>Phone</th><th>Members</th><th>Premiums (KES)</th><th>Status</th></tr></thead>
+          <tbody id="agents-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app-shell -->
+
+<!-- CLAIM STATUS MODAL -->
+<div class="modal-overlay" id="claim-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Update Claim Status</span>
+      <button class="modal-close" onclick="closeModal('claim-modal')">×</button>
+    </div>
+    <div id="modal-claim-info" style="margin-bottom:16px;padding:12px;background:#F9FAFB;border-radius:var(--radius-sm);font-size:13px"></div>
+    <div class="form-group">
+      <label>New Status</label>
+      <select id="modal-claim-status">
+        <option>Pending Review</option><option>Under Assessment</option>
+        <option>Approved</option><option>Partially Approved</option><option>Rejected</option><option>Paid Out</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label>Notes</label>
+      <textarea id="modal-claim-notes" placeholder="Add assessment notes…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('claim-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="updateClaimStatus()">Update Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span class="toast-icon" id="toast-icon"></span><span id="toast-msg"></span></div>
+
+<script>
+// ── SEED DATA ──
+const AGENTS = [
+  {code:'AGT-01',name:'Grace Wanjiku',phone:'0722100001',status:'Active'},
+  {code:'AGT-02',name:'Peter Odhiambo',phone:'0733200002',status:'Active'},
+  {code:'AGT-03',name:'Mercy Achieng',phone:'0700300003',status:'Active'},
+  {code:'AGT-04',name:'Samuel Kiprotich',phone:'0711400004',status:'Inactive'},
+];
+
+let members = [
+  {id:'MBR-001',first:'James',last:'Mwangi',idNo:'23456781',dob:'1985-03-12',phone:'0712001001',phone2:'',email:'james@demo.com',gender:'Male',policy:'Family',premium:4500,agent:'AGT-01',start:'2024-01-15',address:'Westlands, Nairobi',bene:'Mary Mwangi',status:'Active'},
+  {id:'MBR-002',first:'Fatuma',last:'Hassan',idNo:'34567892',dob:'1990-07-22',phone:'0723002002',phone2:'0733002003',email:'',gender:'Female',policy:'Individual',premium:2000,agent:'AGT-02',start:'2024-02-01',address:'Mombasa Road, Nairobi',bene:'Ali Hassan',status:'Active'},
+  {id:'MBR-003',first:'David',last:'Otieno',idNo:'45678903',dob:'1978-11-05',phone:'0700003003',phone2:'',email:'david@demo.com',gender:'Male',policy:'Group',premium:8000,agent:'AGT-01',start:'2024-01-20',address:'Kisumu, Kenya',bene:'Alice Otieno',status:'Lapsed'},
+  {id:'MBR-004',first:'Winnie',last:'Kamau',idNo:'56789014',dob:'1995-05-18',phone:'0711004004',phone2:'',email:'',gender:'Female',policy:'Individual',premium:2000,agent:'AGT-03',start:'2024-03-10',address:'Thika, Kenya',bene:'',status:'Active'},
+  {id:'MBR-005',first:'Brian',last:'Mutua',idNo:'67890125',dob:'1988-09-30',phone:'0722005005',phone2:'0700005006',email:'brian@demo.com',gender:'Male',policy:'Corporate',premium:12000,agent:'AGT-02',start:'2024-01-05',address:'Upper Hill, Nairobi',bene:'Susan Mutua',status:'Active'},
+  {id:'MBR-006',first:'Agnes',last:'Njoroge',idNo:'78901236',dob:'1982-02-14',phone:'0733006006',phone2:'',email:'',gender:'Female',policy:'Family',premium:4500,agent:'AGT-03',start:'2024-04-01',address:'Nakuru, Kenya',bene:'John Njoroge',status:'Active'},
+  {id:'MBR-007',first:'Kevin',last:'Opiyo',idNo:'89012347',dob:'1993-08-09',phone:'0700007007',phone2:'',email:'',gender:'Male',policy:'Individual',premium:2000,agent:'AGT-01',start:'2024-05-15',address:'Eldoret, Kenya',bene:'',status:'Suspended'},
+];
+
+let claims = [
+  {no:'CLM-001',memberId:'MBR-001',type:'Hospitalization',hospital:'Aga Khan Hospital',amount:85000,date:'2025-06-01',status:'Approved',notes:''},
+  {no:'CLM-002',memberId:'MBR-002',type:'Outpatient',hospital:'Kenyatta National Hospital',amount:12000,date:'2025-06-10',status:'Paid Out',notes:''},
+  {no:'CLM-003',memberId:'MBR-005',type:'Surgery',hospital:'Nairobi Hospital',amount:240000,date:'2025-06-15',status:'Under Assessment',notes:''},
+  {no:'CLM-004',memberId:'MBR-004',type:'Maternity',hospital:'MP Shah Hospital',amount:65000,date:'2025-06-18',status:'Pending Review',notes:''},
+  {no:'CLM-005',memberId:'MBR-006',type:'Dental',hospital:'Dentcare Clinic',amount:8500,date:'2025-06-20',status:'Rejected',notes:'Policy exclusion applies'},
+];
+
+let activeClaim = null;
+let memberCounter = 8;
+let claimCounter = 6;
+
+// ── HELPERS ──
+function getMemberName(id){const m=members.find(x=>x.id===id);return m?`${m.first} ${m.last}`:id}
+function getAgentName(code){const a=AGENTS.find(x=>x.code===code);return a?a.name:code}
+function statusBadge(s){
+  const map={Active:'green',Lapsed:'amber',Suspended:'red','Pending Review':'amber','Under Assessment':'blue',Approved:'green','Partially Approved':'blue','Paid Out':'purple',Rejected:'red','Paid Out':'green'};
+  return `<span class="badge badge-${map[s]||'blue'}">${s}</span>`;
+}
+function fmt(n){return Number(n).toLocaleString()}
+function today(){return new Date().toISOString().split('T')[0]}
+function toast(msg,icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+// ── PANEL SWITCHER ──
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelector(`[onclick="showPanel('${name}')"]`)?.classList.add('active');
+  refreshPanel(name);
+}
+
+function refreshPanel(name){
+  if(name==='dashboard') renderDashboard();
+  if(name==='member-list') renderMemberTable();
+  if(name==='claims-list') renderClaimsTable();
+  if(name==='agents') renderAgents();
+  if(name==='member-capture') populateAgentDropdowns();
+}
+
+// ── DASHBOARD ──
+function renderDashboard(){
+  document.getElementById('stat-members').textContent=members.length;
+  document.getElementById('stat-active').textContent=members.filter(m=>m.status==='Active').length;
+  document.getElementById('stat-claims').textContent=claims.filter(c=>c.status==='Pending Review'||c.status==='Under Assessment').length;
+  const total=members.filter(m=>m.status==='Active').reduce((s,m)=>s+Number(m.premium),0);
+  document.getElementById('stat-premiums').textContent=fmt(total);
+
+  const rBody=document.getElementById('dashboard-recent');
+  rBody.innerHTML=members.slice(-5).reverse().map(m=>`
+    <tr>
+      <td><code style="font-size:11px;color:var(--purple-light)">${m.id}</code></td>
+      <td>${m.first} ${m.last}</td>
+      <td>${m.policy}</td>
+      <td>KES ${fmt(m.premium)}</td>
+      <td>${statusBadge(m.status)}</td>
+    </tr>`).join('');
+
+  const cBody=document.getElementById('dashboard-claims');
+  cBody.innerHTML=claims.slice(-4).reverse().map(c=>`
+    <tr>
+      <td><code style="font-size:11px;color:var(--purple-light)">${c.no}</code></td>
+      <td>${getMemberName(c.memberId)}</td>
+      <td>${c.type}</td>
+      <td>KES ${fmt(c.amount)}</td>
+      <td>${statusBadge(c.status)}</td>
+    </tr>`).join('');
+}
+
+// ── MEMBERS ──
+function renderMemberTable(filter=''){
+  const filtered=members.filter(m=>{
+    const q=filter.toLowerCase();
+    return !q||m.first.toLowerCase().includes(q)||m.last.toLowerCase().includes(q)||m.idNo.includes(q)||m.phone.includes(q)||m.id.toLowerCase().includes(q);
+  });
+  const body=document.getElementById('member-table-body');
+  if(!filtered.length){body.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="empty-icon">👥</div><p>No members found.</p></div></td></tr>`;return;}
+  body.innerHTML=filtered.map(m=>`
+    <tr>
+      <td><code style="font-size:11px;color:var(--purple-light)">${m.id}</code></td>
+      <td><strong>${m.first} ${m.last}</strong></td>
+      <td>${m.idNo}</td>
+      <td>${m.phone}</td>
+      <td><span class="badge badge-purple">${m.policy}</span></td>
+      <td>KES ${fmt(m.premium)}</td>
+      <td>${statusBadge(m.status)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="enquireFromList('${m.id}')">View</button></td>
+    </tr>`).join('');
+}
+function filterMembers(){renderMemberTable(document.getElementById('member-search-input').value)}
+function enquireFromList(id){showPanel('member-search');setTimeout(()=>{document.getElementById('enquiry-input').value=id;enquireMember();},100)}
+
+function populateAgentDropdowns(){
+  ['cap-agent','rec-agent'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const isRec=id==='rec-agent';
+    el.innerHTML=(isRec?'<option value="">All Agents</option>':'')+AGENTS.map(a=>`<option value="${a.code}">${a.name}</option>`).join('');
+  });
+}
+
+function captureMember(){
+  const first=document.getElementById('cap-first').value.trim();
+  const last=document.getElementById('cap-last').value.trim();
+  const idNo=document.getElementById('cap-id').value.trim();
+  const phone=document.getElementById('cap-phone').value.trim();
+  const premium=document.getElementById('cap-premium').value;
+  const start=document.getElementById('cap-start').value;
+  if(!first||!last||!idNo||!phone||!premium||!start){toast('Please fill all required fields.','⚠️');return;}
+  const newId=`MBR-00${memberCounter++}`;
+  members.push({
+    id:newId,first,last,
+    idNo:document.getElementById('cap-id').value,
+    dob:document.getElementById('cap-dob').value,
+    phone,phone2:document.getElementById('cap-phone2').value,
+    email:document.getElementById('cap-email').value,
+    gender:document.getElementById('cap-gender').value,
+    policy:document.getElementById('cap-policy').value,
+    premium:Number(premium),
+    agent:document.getElementById('cap-agent').value,
+    start,
+    address:document.getElementById('cap-address').value,
+    bene:document.getElementById('cap-bene').value,
+    status:'Active'
+  });
+  ['cap-first','cap-last','cap-id','cap-dob','cap-phone','cap-phone2','cap-email','cap-premium','cap-start','cap-address','cap-bene'].forEach(id=>{document.getElementById(id).value=''});
+  toast(`Member ${first} ${last} registered as ${newId}`,'✅');
+  showPanel('member-list');
+}
+
+function enquireMember(){
+  const q=document.getElementById('enquiry-input').value.trim().toLowerCase();
+  const m=members.find(x=>x.id.toLowerCase()===q||x.idNo===q||x.phone===q);
+  const out=document.getElementById('enquiry-result');
+  if(!m){out.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><p>No member found for "<strong>${q}</strong>"</p></div>`;return;}
+  const mClaims=claims.filter(c=>c.memberId===m.id);
+  out.innerHTML=`
+    <div class="card" style="padding:20px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+        <div>
+          <div style="font-size:18px;font-weight:700">${m.first} ${m.last}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px">${m.id} · ${m.policy} Policy</div>
+        </div>
+        ${statusBadge(m.status)}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;font-size:13px;margin-bottom:16px">
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">National ID</div>${m.idNo}</div>
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">Date of Birth</div>${m.dob}</div>
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">Gender</div>${m.gender}</div>
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">Phone</div>${m.phone}</div>
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">Email</div>${m.email||'—'}</div>
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">Address</div>${m.address||'—'}</div>
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">Premium</div>KES ${fmt(m.premium)}/mo</div>
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">Agent</div>${getAgentName(m.agent)}</div>
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">Policy Start</div>${m.start}</div>
+        <div><div style="color:var(--muted);font-size:11px;margin-bottom:2px">Beneficiary</div>${m.bene||'—'}</div>
+      </div>
+      ${mClaims.length?`<div style="font-weight:600;margin-bottom:8px;font-size:13px">Claims (${mClaims.length})</div>
+        <table><thead><tr><th>Claim No.</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>${mClaims.map(c=>`<tr><td>${c.no}</td><td>${c.type}</td><td>KES ${fmt(c.amount)}</td><td>${statusBadge(c.status)}</td></tr>`).join('')}</tbody></table>`
+        :'<div style="color:var(--muted);font-size:13px">No claims on file.</div>'}
+    </div>`;
+}
+
+// ── CLAIMS ──
+function renderClaimsTable(filter=''){
+  const filtered=claims.filter(c=>{
+    const q=filter.toLowerCase();
+    return !q||getMemberName(c.memberId).toLowerCase().includes(q)||c.type.toLowerCase().includes(q)||c.no.toLowerCase().includes(q);
+  });
+  const body=document.getElementById('claims-table-body');
+  if(!filtered.length){body.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><p>No claims found.</p></div></td></tr>`;return;}
+  body.innerHTML=filtered.map(c=>`
+    <tr>
+      <td><code style="font-size:11px;color:var(--purple-light)">${c.no}</code></td>
+      <td>${getMemberName(c.memberId)}</td>
+      <td>${c.type}</td>
+      <td>KES ${fmt(c.amount)}</td>
+      <td>${c.date}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="openClaimModal('${c.no}')">Update</button></td>
+    </tr>`).join('');
+}
+function filterClaims(){renderClaimsTable(document.getElementById('claim-filter').value)}
+
+function fileClaim(){
+  const memberId=document.getElementById('cl-member-id').value.trim().toUpperCase();
+  const type=document.getElementById('cl-type').value;
+  const amount=document.getElementById('cl-amount').value;
+  const date=document.getElementById('cl-date').value;
+  if(!memberId||!amount||!date){toast('Please fill all required fields.','⚠️');return;}
+  if(!members.find(m=>m.id===memberId)){toast(`Member ${memberId} not found. Check the ID.`,'❌');return;}
+  const no=`CLM-00${claimCounter++}`;
+  claims.push({no,memberId,type,hospital:document.getElementById('cl-hospital').value,amount:Number(amount),date,status:'Pending Review',notes:document.getElementById('cl-notes').value});
+  ['cl-member-id','cl-hospital','cl-amount','cl-date','cl-notes'].forEach(id=>{document.getElementById(id).value=''});
+  toast(`Claim ${no} filed successfully`,'✅');
+  showPanel('claims-list');
+}
+
+function openClaimModal(no){
+  activeClaim=claims.find(c=>c.no===no);
+  if(!activeClaim)return;
+  document.getElementById('modal-claim-info').innerHTML=`<strong>${activeClaim.no}</strong> · ${getMemberName(activeClaim.memberId)} · ${activeClaim.type} · KES ${fmt(activeClaim.amount)}`;
+  document.getElementById('modal-claim-status').value=activeClaim.status;
+  document.getElementById('modal-claim-notes').value=activeClaim.notes||'';
+  document.getElementById('claim-modal').classList.add('open');
+}
+
+function updateClaimStatus(){
+  if(!activeClaim)return;
+  activeClaim.status=document.getElementById('modal-claim-status').value;
+  activeClaim.notes=document.getElementById('modal-claim-notes').value;
+  closeModal('claim-modal');
+  toast(`${activeClaim.no} updated to "${activeClaim.status}"`,'✅');
+  renderClaimsTable();
+}
+
+// ── REPORTS ──
+function generateReport(type){
+  const el=document.getElementById('report-output');
+  const content=document.getElementById('report-content');
+  const title=document.getElementById('report-title');
+  el.style.display='block';
+  const pad=(s,n)=>String(s).padEnd(n);
+  if(type==='captured'){
+    title.textContent='Members Captured Report';
+    content.textContent='AMIABLE INSURANCE SYSTEM\nMEMBERS CAPTURED REPORT\nGenerated: '+new Date().toLocaleString()+'\n'+'─'.repeat(80)+'\n\n'+
+      pad('Member ID',12)+pad('Name',22)+pad('Policy',12)+pad('Premium',12)+pad('Agent',20)+pad('Start Date',12)+'\n'+'─'.repeat(80)+'\n'+
+      members.map(m=>pad(m.id,12)+pad(`${m.first} ${m.last}`,22)+pad(m.policy,12)+pad('KES '+fmt(m.premium),12)+pad(getAgentName(m.agent),20)+pad(m.start,12)).join('\n')+
+      '\n\n'+'─'.repeat(80)+'\nTotal Members: '+members.length;
+  } else if(type==='status'){
+    const active=members.filter(m=>m.status==='Active');
+    const lapsed=members.filter(m=>m.status==='Lapsed');
+    const susp=members.filter(m=>m.status==='Suspended');
+    title.textContent='Member Status Report';
+    content.textContent='AMIABLE INSURANCE SYSTEM\nMEMBER STATUS REPORT\nGenerated: '+new Date().toLocaleString()+'\n'+'─'.repeat(60)+'\n\n'+
+      `ACTIVE:    ${active.length} members\nLAPSED:    ${lapsed.length} members\nSUSPENDED: ${susp.length} members\nTOTAL:     ${members.length} members\n\n`+'─'.repeat(60)+'\nACTIVE MEMBERS:\n'+
+      active.map(m=>`  ${m.id}  ${m.first} ${m.last}  (${m.policy}) - KES ${fmt(m.premium)}/mo`).join('\n')+
+      (lapsed.length?'\n\nLAPSED MEMBERS:\n'+lapsed.map(m=>`  ${m.id}  ${m.first} ${m.last}`).join('\n'):'');
+  } else if(type==='nonpay'){
+    const np=members.filter(m=>m.status==='Lapsed'||m.status==='Suspended');
+    title.textContent='Non-Payment Report';
+    content.textContent='AMIABLE INSURANCE SYSTEM\nNON-PAYMENT REPORT\nGenerated: '+new Date().toLocaleString()+'\n'+'─'.repeat(60)+'\n\n'+
+      (np.length?np.map(m=>`${m.id}  ${m.first} ${m.last}\n  Phone: ${m.phone}  Agent: ${getAgentName(m.agent)}\n  Overdue Premium: KES ${fmt(m.premium)}/mo  Status: ${m.status}`).join('\n\n'):'No overdue accounts found.');
+  } else if(type==='listing'){
+    title.textContent='Full Member Extract';
+    content.textContent='AMIABLE INSURANCE SYSTEM\nFULL MEMBER EXTRACT\nGenerated: '+new Date().toLocaleString()+'\n'+'─'.repeat(80)+'\n\n'+
+      members.map(m=>`[${m.id}] ${m.first} ${m.last}\n  ID No: ${m.idNo}  |  DOB: ${m.dob}  |  Gender: ${m.gender}\n  Phone: ${m.phone}${m.phone2?' / '+m.phone2:''}  |  Email: ${m.email||'N/A'}\n  Policy: ${m.policy}  |  Premium: KES ${fmt(m.premium)}/mo  |  Start: ${m.start}\n  Beneficiary: ${m.bene||'None'}  |  Agent: ${getAgentName(m.agent)}\n  Status: ${m.status}`).join('\n\n'+'─'.repeat(60)+'\n\n');
+  }
+}
+
+function generateReceiptReport(){
+  const from=document.getElementById('rec-from').value;
+  const to=document.getElementById('rec-to').value;
+  const agent=document.getElementById('rec-agent').value;
+  const out=document.getElementById('receipt-report-output');
+  let filtered=members.filter(m=>m.status==='Active');
+  if(agent)filtered=filtered.filter(m=>m.agent===agent);
+  const total=filtered.reduce((s,m)=>s+m.premium,0);
+  out.innerHTML=`<div class="card-header" style="background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;padding:12px 16px"><span style="font-weight:600">Receipt Report${from?' ('+from+' to '+to+')':''}</span></div>
+    <div class="report-box">AMIABLE INSURANCE — PAYMENT LIST\nPeriod: ${from||'All dates'} to ${to||'All dates'}  |  Agent: ${agent?getAgentName(agent):'All'}\nGenerated: ${new Date().toLocaleString()}\n${'─'.repeat(70)}\n\n${filtered.map((m,i)=>`${String(i+1).padStart(3,'0')}. ${m.id}  ${m.first} ${m.last.padEnd(18)}  KES ${fmt(m.premium).padStart(8)}`).join('\n')}\n\n${'─'.repeat(70)}\nTotal Receipts: ${filtered.length}  |  Total Amount: KES ${fmt(total)}</div>`;
+}
+
+function generateUWReport(){
+  const month=document.getElementById('uw-month').value;
+  const active=members.filter(m=>m.status==='Active');
+  const total=active.reduce((s,m)=>s+m.premium,0);
+  document.getElementById('uw-report-output').innerHTML=`<div class="card-header" style="background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;padding:12px 16px"><span style="font-weight:600">Underwriter Monthly Payment List — ${month}</span></div>
+    <div class="report-box">AMIABLE INSURANCE SYSTEM\nUNDERWRITER MONTHLY PAYMENT LIST\nMonth: ${month}  |  Generated: ${new Date().toLocaleString()}\n${'─'.repeat(75)}\n\n${'NO.'.padEnd(5)}${'MEMBER ID'.padEnd(12)}${'MEMBER NAME'.padEnd(25)}${'POLICY'.padEnd(12)}${'PREMIUM (KES)'.padEnd(15)}\n${'─'.repeat(75)}\n${active.map((m,i)=>`${String(i+1).padEnd(5)}${m.id.padEnd(12)}${(m.first+' '+m.last).padEnd(25)}${m.policy.padEnd(12)}${fmt(m.premium).padStart(12)}`).join('\n')}\n\n${'─'.repeat(75)}\nTotal Members: ${active.length}  |  Total Monthly Premium: KES ${fmt(total)}\n\nPrepared by: Admin User\nFor submission to: Insurance Underwriter\nDate: ${new Date().toLocaleDateString()}</div>`;
+}
+
+// ── AGENTS TABLE ──
+function renderAgents(){
+  const body=document.getElementById('agents-table');
+  body.innerHTML=AGENTS.map(a=>{
+    const agentMembers=members.filter(m=>m.agent===a.code&&m.status==='Active');
+    const total=agentMembers.reduce((s,m)=>s+m.premium,0);
+    return `<tr>
+      <td><code style="font-size:11px;color:var(--purple-light)">${a.code}</code></td>
+      <td><strong>${a.name}</strong></td>
+      <td>${a.phone}</td>
+      <td>${agentMembers.length}</td>
+      <td>KES ${fmt(total)}</td>
+      <td>${statusBadge(a.status)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── INIT ──
+populateAgentDropdowns();
+renderDashboard();
+document.getElementById('cap-start').value=today();
+document.getElementById('cl-date').value=today();
+</script>
+</body>
+</html>

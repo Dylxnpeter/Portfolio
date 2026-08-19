@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dylan Njang'iru — Software Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060810;
+  --bg2:#0A0F1E;
+  --surface:#0F1629;
+  --surface2:#161F3A;
+  --border:rgba(124,58,237,0.15);
+  --border2:rgba(56,189,248,0.12);
+  --purple:#7C3AED;
+  --purple-light:#A78BFA;
+  --purple-dim:rgba(124,58,237,0.12);
+  --cyan:#38BDF8;
+  --cyan-dim:rgba(56,189,248,0.1);
+  --green:#10B981;
+  --green-dim:rgba(16,185,129,0.1);
+  --amber:#F59E0B;
+  --amber-dim:rgba(245,158,11,0.1);
+  --coral:#F43F5E;
+  --coral-dim:rgba(244,63,94,0.1);
+  --text:#E2E8F0;
+  --muted:#94A3B8;
+  --dim:#475569;
+  --radius:14px;
+  --radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ─── GRID BACKGROUND ─── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(124,58,237,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,58,237,0.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;z-index:0;
+}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.5rem;height:64px;
+  background:rgba(6,8,16,0.8);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  color:var(--purple-light);letter-spacing:0.06em;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--purple);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{
+  font-size:13px;color:var(--muted);text-decoration:none;
+  font-family:'JetBrains Mono',monospace;letter-spacing:0.02em;
+  transition:color 0.2s;position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;
+  background:var(--cyan);transition:width 0.2s;
+}
+.nav-links a:hover{color:var(--cyan)}
+.nav-links a:hover::after{width:100%}
+
+/* ─── SECTIONS ─── */
+.container{max-width:1080px;margin:0 auto;padding:0 2rem;position:relative;z-index:1}
+section{padding:7rem 0}
+
+/* ─── HERO ─── */
+#hero{
+  min-height:100vh;display:flex;align-items:center;padding-top:64px;
+  position:relative;overflow:hidden;
+}
+.hero-glow{
+  position:absolute;border-radius:50%;pointer-events:none;filter:blur(120px);
+}
+.glow-purple{width:600px;height:600px;background:rgba(124,58,237,0.08);top:-10%;right:-10%}
+.glow-cyan{width:400px;height:400px;background:rgba(56,189,248,0.05);bottom:10%;left:-5%}
+
+.hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px;border-radius:20px;
+  border:1px solid var(--border);background:var(--purple-dim);
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--purple-light);letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:1.5rem;
+}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(2.4rem,4.5vw,3.8rem);
+  font-weight:700;line-height:1.08;
+  letter-spacing:-0.03em;color:#fff;margin-bottom:1.5rem;
+}
+.h1-line2{
+  background:linear-gradient(135deg,var(--purple-light),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-desc{font-size:16px;color:var(--muted);line-height:1.85;margin-bottom:2rem;max-width:460px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 22px;border-radius:var(--radius-sm);
+  font-size:14px;font-weight:500;text-decoration:none;
+  transition:all 0.2s;cursor:pointer;border:none;font-family:'Inter',sans-serif;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--purple),#5B21B6);color:#fff;
+  box-shadow:0 0 20px rgba(124,58,237,0.3);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(124,58,237,0.5)}
+.btn-ghost{
+  background:transparent;color:var(--muted);
+  border:1px solid rgba(255,255,255,0.1);
+}
+.btn-ghost:hover{color:var(--cyan);border-color:var(--cyan);background:var(--cyan-dim)}
+
+/* ─── TERMINAL ─── */
+.terminal{
+  background:#080D1A;border:1px solid rgba(124,58,237,0.25);
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 0 60px rgba(124,58,237,0.1),0 0 0 1px rgba(255,255,255,0.03);
+}
+.term-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:12px 16px;border-bottom:1px solid rgba(124,58,237,0.15);
+  background:#06080F;
+}
+.tdot{width:10px;height:10px;border-radius:50%}
+.tdot-r{background:#F43F5E}.tdot-y{background:#F59E0B}.tdot-g{background:#10B981}
+.term-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);margin-left:8px}
+.term-body{padding:20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:2;min-height:220px}
+.t-prompt{color:var(--purple-light)}
+.t-cmd{color:var(--cyan)}
+.t-out{color:var(--muted)}
+.t-str{color:var(--green)}
+.t-key{color:var(--purple-light)}
+.t-cursor{
+  display:inline-block;width:8px;height:14px;
+  background:var(--cyan);vertical-align:middle;
+  animation:cur 1s step-end infinite;
+}
+@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ─── TICKER ─── */
+.ticker-section{
+  padding:1.5rem 0;border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);overflow:hidden;position:relative;z-index:1;
+}
+.ticker-track{
+  display:flex;gap:3rem;white-space:nowrap;
+  animation:ticker 30s linear infinite;
+}
+.ticker-track:hover{animation-play-state:paused}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-item{
+  display:flex;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--dim);flex-shrink:0;
+}
+.ticker-item span.badge{
+  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;
+}
+.t-purple{background:var(--purple-dim);color:var(--purple-light)}
+.t-cyan{background:var(--cyan-dim);color:var(--cyan)}
+.t-green{background:var(--green-dim);color:var(--green)}
+.t-amber{background:var(--amber-dim);color:var(--amber)}
+.t-coral{background:var(--coral-dim);color:var(--coral)}
+.ticker-sep{color:var(--border);font-size:20px;line-height:1}
+
+/* ─── SECTION HEADERS ─── */
+.sec-label{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--purple-light);letter-spacing:0.14em;text-transform:uppercase;
+  margin-bottom:0.75rem;display:flex;align-items:center;gap:10px;
+}
+.sec-label::before{content:'//';color:var(--dim)}
+h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(1.8rem,3vw,2.4rem);font-weight:700;
+  color:#fff;letter-spacing:-0.02em;margin-bottom:1rem;
+}
+.sec-sub{color:var(--muted);font-size:16px;max-width:540px;margin-bottom:3rem}
+
+/* ─── ABOUT ─── */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+.about-text p{color:var(--muted);line-height:1.9;margin-bottom:1rem}
+.about-text strong{color:var(--text);font-weight:500}
+
+.skills-list{display:flex;flex-direction:column;gap:14px}
+.skill-row{display:flex;flex-direction:column;gap:6px}
+.skill-meta{display:flex;justify-content:space-between;align-items:center}
+.skill-name{font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text)}
+.skill-pct{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--purple-light)}
+.skill-bar{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.skill-fill{height:100%;border-radius:2px;width:0;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
+.fill-purple{background:linear-gradient(90deg,var(--purple),var(--purple-light))}
+.fill-cyan{background:linear-gradient(90deg,#0EA5E9,var(--cyan))}
+.fill-green{background:linear-gradient(90deg,#059669,var(--green))}
+
+/* ─── STACK GRID ─── */
+.stack-section{margin-top:3rem;padding-top:3rem;border-top:1px solid var(--border)}
+.stack-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.stack-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:16px 18px;
+  transition:border-color 0.2s,background 0.2s;
+}
+.stack-card:hover{border-color:rgba(124,58,237,0.3);background:var(--surface2)}
+.stack-cat-label{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;
+}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
+.tag-p{background:var(--purple-dim);color:var(--purple-light)}
+.tag-c{background:var(--cyan-dim);color:var(--cyan)}
+.tag-g{background:var(--green-dim);color:var(--green)}
+.tag-a{background:var(--amber-dim);color:var(--amber)}
+.tag-r{background:var(--coral-dim);color:var(--coral)}
+
+/* ─── PROJECTS ─── */
+.filter-bar{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:2.5rem;
+}
+.filter-btn{
+  padding:7px 16px;border-radius:20px;
+  font-size:12px;font-family:'JetBrains Mono',monospace;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);cursor:pointer;transition:all 0.2s;
+}
+.filter-btn:hover,.filter-btn.active{
+  background:var(--purple-dim);color:var(--purple-light);border-color:rgba(124,58,237,0.4);
+}
+
+.projects-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:20px;
+}
+.project-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:0;overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:transform 0.2s,border-color 0.2s,box-shadow 0.2s;
+  position:relative;cursor:default;
+}
+.project-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(124,58,237,0.35);
+  box-shadow:0 12px 40px rgba(0,0,0,0.4),0 0 0 1px rgba(124,58,237,0.1);
+}
+.project-card.hidden{display:none}
+
+.card-top{padding:22px 22px 0}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.card-icon{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+}
+.card-status{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:3px 9px;border-radius:20px;font-weight:600;
+  letter-spacing:0.06em;text-transform:uppercase;
+}
+.status-live{background:var(--green-dim);color:var(--green)}
+.status-demo{background:var(--cyan-dim);color:var(--cyan)}
+.status-built{background:var(--purple-dim);color:var(--purple-light)}
+.status-wip{background:var(--amber-dim);color:var(--amber)}
+
+.card-title{
+  font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;
+  color:#fff;line-height:1.3;margin-bottom:8px;
+}
+.card-desc{font-size:13px;color:var(--muted);line-height:1.75}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;padding:14px 22px}
+.card-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;border-top:1px solid var(--border);margin-top:auto;
+}
+.card-link{
+  font-size:12px;font-family:'JetBrains Mono',monospace;
+  color:var(--cyan);text-decoration:none;
+  display:flex;align-items:center;gap:5px;
+  transition:gap 0.2s,color 0.2s;font-weight:500;
+}
+.card-link:hover{gap:10px}
+.card-cat{
+  font-size:10px;font-family:'JetBrains Mono',monospace;
+  color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;
+}
+
+/* accent strip on hover */
+.project-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  opacity:0;transition:opacity 0.3s;
+}
+.project-card:hover::after{opacity:1}
+.acc-purple::after{background:linear-gradient(90deg,var(--purple),var(--purple-light))}
+.acc-cyan::after{background:linear-gradient(90deg,#0EA5E9,var(--cyan))}
+.acc-green::after{background:linear-gradient(90deg,#059669,var(--green))}
+.acc-amber::after{background:linear-gradient(90deg,#D97706,var(--amber))}
+.acc-coral::after{background:linear-gradient(90deg,#E11D48,var(--coral))}
+
+/* ─── CONTACT ─── */
+#contact{text-align:center}
+.contact-terminal{
+  max-width:560px;margin:0 auto 3rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 0 40px rgba(124,58,237,0.08);
+}
+.cterm-body{
+  padding:24px;font-family:'JetBrains Mono',monospace;
+  font-size:13px;line-height:2.2;text-align:left;
+}
+.ct-prompt{color:var(--purple-light)}
+.ct-key{color:var(--cyan)}
+.ct-val{color:var(--green)}
+.ct-at{color:var(--muted)}
+
+.contact-cards{
+  display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:2rem;
+}
+.c-card{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 20px;border:1px solid var(--border);
+  border-radius:var(--radius-sm);text-decoration:none;
+  color:var(--muted);font-size:13px;font-weight:500;
+  background:var(--surface);transition:all 0.2s;
+}
+.c-card:hover{
+  border-color:var(--purple);color:var(--purple-light);
+  background:var(--purple-dim);transform:translateY(-2px);
+}
+.c-card svg{width:18px;height:18px;flex-shrink:0}
+
+/* ─── FOOTER ─── */
+footer{
+  padding:2rem;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);
+  border-top:1px solid var(--border);position:relative;z-index:1;
+}
+
+/* ─── REVEAL ON SCROLL ─── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.6s ease,transform 0.6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+
+/* ─── DIVIDER ─── */
+.divider{height:1px;background:var(--border);max-width:1080px;margin:0 auto}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .hero-inner,.about-grid{grid-template-columns:1fr;gap:2rem}
+  .terminal{display:none}
+  nav{padding:0 1rem}
+  .nav-links{gap:1.25rem}
+  section{padding:5rem 0}
+  h1{font-size:2.2rem}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:0.01ms!important;transition-duration:0.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span class="nav-logo-dot"></span>
+    dylan.njangiru
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#projects">projects</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-glow glow-purple"></div>
+  <div class="hero-glow glow-cyan"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-badge">
+          <span class="status-dot"></span>
+          Available for freelance work
+        </div>
+        <h1>Engineering software<br><span class="h1-line2">that scales &amp; secures.</span></h1>
+        <p class="hero-desc">
+          Full-stack developer, data engineer, and security practitioner based in Nairobi, Kenya. I build production-grade systems with AI integration and a security-first architecture.
+        </p>
+        <div class="hero-actions">
+          <a href="#projects" class="btn btn-primary">View my work</a>
+          <a href="https://github.com/Dylxnpeter" target="_blank" rel="noopener" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+
+      <!-- TERMINAL -->
+      <div class="terminal">
+        <div class="term-bar">
+          <span class="tdot tdot-r"></span>
+          <span class="tdot tdot-y"></span>
+          <span class="tdot tdot-g"></span>
+          <span class="term-title">dylan@nairobi:~$</span>
+        </div>
+        <div class="term-body" id="terminal-output"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH TICKER -->
+<div class="ticker-section">
+  <div class="ticker-track" id="ticker">
+    <div class="ticker-item"><span class="badge t-purple">Python</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-cyan">TypeScript</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-coral">Java</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-green">C#</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-amber">PostgreSQL</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-purple">FastAPI</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-cyan">Node.js</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-green">React</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-coral">Wazuh SIEM</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-amber">Kafka</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-purple">GPT-4o</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-cyan">Docker</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-green">Redis</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-amber">Netlify</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-coral">JWT / RLS</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-purple">Streamlit</span><span class="ticker-sep">·</span></div>
+    <!-- duplicate for seamless loop -->
+    <div class="ticker-item"><span class="badge t-purple">Python</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-cyan">TypeScript</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-coral">Java</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-green">C#</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-amber">PostgreSQL</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-purple">FastAPI</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-cyan">Node.js</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-green">React</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-coral">Wazuh SIEM</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-amber">Kafka</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-purple">GPT-4o</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-cyan">Docker</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-green">Redis</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-amber">Netlify</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-coral">JWT / RLS</span><span class="ticker-sep">·</span></div>
+    <div class="ticker-item"><span class="badge t-purple">Streamlit</span><span class="ticker-sep">·</span></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="sec-label reveal">about me</div>
+    <h2 class="reveal">Building from the ground up.</h2>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>I'm a freelance software engineer based in <strong>Nairobi, Kenya</strong>, working across the full stack — from low-level database schema design to AI-powered APIs, data pipelines, and security operations.</p>
+        <p>My projects span <strong>enterprise analytics platforms</strong>, <strong>insurance management systems</strong>, <strong>security tooling</strong>, and <strong>AI-integrated applications</strong>. I architect systems with isolation-first thinking: the production environment is sacred.</p>
+        <p>Clients include <strong>Autopak International Ltd</strong> and <strong>Keeping Hope Alive Foundation</strong>. I also take on work through Upwork, Fiverr, and Scale AI.</p>
+        <p>Outside client work I explore IoT pipelines, game development in Unity, and building internal tooling for the workflows I live in daily.</p>
+        <div style="margin-top:1.5rem">
+          <a href="https://github.com/Dylxnpeter" target="_blank" class="btn btn-ghost" style="display:inline-flex">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            View GitHub Profile
+          </a>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-1">
+        <div class="skills-list">
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">Python / FastAPI</span><span class="skill-pct">92%</span></div>
+            <div class="skill-bar"><div class="skill-fill fill-purple" data-width="92"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">Java / Systems Design</span><span class="skill-pct">88%</span></div>
+            <div class="skill-bar"><div class="skill-fill fill-cyan" data-width="88"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">Full-Stack (Node / React)</span><span class="skill-pct">85%</span></div>
+            <div class="skill-bar"><div class="skill-fill fill-purple" data-width="85"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">PostgreSQL / Data Eng.</span><span class="skill-pct">87%</span></div>
+            <div class="skill-bar"><div class="skill-fill fill-cyan" data-width="87"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">Security / SIEM</span><span class="skill-pct">78%</span></div>
+            <div class="skill-bar"><div class="skill-fill fill-green" data-width="78"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">AI Integration / LLMs</span><span class="skill-pct">80%</span></div>
+            <div class="skill-bar"><div class="skill-fill fill-purple" data-width="80"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">C# / Unity / IoT</span><span class="skill-pct">72%</span></div>
+            <div class="skill-bar"><div class="skill-fill fill-green" data-width="72"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-section reveal reveal-delay-2">
+      <div class="stack-cats">
+        <div class="stack-card">
+          <div class="stack-cat-label">Languages</div>
+          <div class="tag-row">
+            <span class="tag tag-p">Python</span><span class="tag tag-c">TypeScript</span>
+            <span class="tag tag-a">Java</span><span class="tag tag-g">C#</span><span class="tag tag-p">SQL</span>
+          </div>
+        </div>
+        <div class="stack-card">
+          <div class="stack-cat-label">AI / ML</div>
+          <div class="tag-row">
+            <span class="tag tag-p">GPT-4o</span><span class="tag tag-c">FastAPI</span>
+            <span class="tag tag-g">RAG</span><span class="tag tag-a">MLOps</span><span class="tag tag-p">LangChain</span>
+          </div>
+        </div>
+        <div class="stack-card">
+          <div class="stack-cat-label">Backend / Data</div>
+          <div class="tag-row">
+            <span class="tag tag-g">Node.js</span><span class="tag tag-c">Fastify</span>
+            <span class="tag tag-g">PostgreSQL</span><span class="tag tag-a">Kafka</span><span class="tag tag-g">Redis</span>
+          </div>
+        </div>
+        <div class="stack-card">
+          <div class="stack-cat-label">Security</div>
+          <div class="tag-row">
+            <span class="tag tag-r">Wazuh SIEM</span><span class="tag tag-r">JWT</span>
+            <span class="tag tag-r">RLS</span><span class="tag tag-r">PII Masking</span><span class="tag tag-r">SOC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <div class="sec-label reveal">projects</div>
+    <h2 class="reveal">Things I've shipped.</h2>
+    <p class="sec-sub reveal">Production systems, sanitised demos, and open-source tools across my focus areas. <a href="demos/index.html" style="color:var(--cyan);text-decoration:none;font-weight:500">Browse all demos →</a></p>
+
+    <div class="filter-bar reveal">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="analytics">Analytics</button>
+      <button class="filter-btn" data-filter="enterprise">Enterprise</button>
+      <button class="filter-btn" data-filter="security">Security</button>
+      <button class="filter-btn" data-filter="finance">Finance</button>
+      <button class="filter-btn" data-filter="systems">Systems</button>
+    </div>
+
+    <div class="projects-grid">
+
+      <!-- Xpert Analytics -->
+      <div class="project-card acc-cyan" data-category="analytics">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--cyan-dim)">📊</div>
+            <span class="card-status status-demo">Demo</span>
+          </div>
+          <div class="card-title">Xpert Analytics</div>
+          <div class="card-desc">Five-layer secure analytics platform over an ERP: MySQL ETL → PII anonymisation firewall (SHA-256) → PostgreSQL warehouse → FastAPI → Streamlit dashboards with JWT RBAC. Fully isolated from production.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-c">FastAPI</span><span class="tag tag-g">Streamlit</span>
+          <span class="tag tag-r">PII Masking</span><span class="tag tag-a">ETL</span><span class="tag tag-g">PostgreSQL</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">analytics · security</span>
+          <a href="https://github.com/Dylxnpeter" target="_blank" class="card-link">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Amiable Insurance -->
+      <div class="project-card acc-purple" data-category="enterprise">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--purple-dim)">🛡️</div>
+            <span class="card-status status-demo">Live Demo</span>
+          </div>
+          <div class="card-title">Amiable Insurance System</div>
+          <div class="card-desc">Sanitised demo of a production insurance management platform — member management, claims processing, policy reports, receipting, underwriter reports, and SMS reminders. Seeded with realistic fictional data. Royal purple &amp; white theme.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-a">Java</span><span class="tag tag-p">HTML/CSS/JS</span>
+          <span class="tag tag-g">Seed Data</span><span class="tag tag-c">Reports</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">enterprise · insurance</span>
+          <a href="demos/amiable-insurance.html" class="card-link">View demo →</a>
+        </div>
+      </div>
+
+      <!-- StockMaster Pro -->
+      <div class="project-card acc-green" data-category="finance">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--green-dim)">📈</div>
+            <span class="card-status status-built">Built</span>
+          </div>
+          <div class="card-title">StockMaster Pro</div>
+          <div class="card-desc">Inventory and stock management system with real-time stock tracking, purchase order management, supplier records, low-stock alerts, and detailed inventory reports.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-a">Java</span><span class="tag tag-g">MySQL</span>
+          <span class="tag tag-c">Inventory</span><span class="tag tag-p">Reports</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">enterprise · finance</span>
+          <a href="https://github.com/Dylxnpeter" target="_blank" class="card-link">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Polymarket Trader -->
+      <div class="project-card acc-amber" data-category="finance">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--amber-dim)">💹</div>
+            <span class="card-status status-built">Built</span>
+          </div>
+          <div class="card-title">Polymarket Trader</div>
+          <div class="card-desc">Automated prediction market trading bot for Polymarket — market scanning, position sizing, odds analysis, and trade execution with risk controls and P&L tracking.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-p">Python</span><span class="tag tag-c">API</span>
+          <span class="tag tag-a">Trading Bot</span><span class="tag tag-g">Automation</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">finance · automation</span>
+          <a href="https://github.com/Dylxnpeter" target="_blank" class="card-link">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- ATM Management -->
+      <div class="project-card acc-cyan" data-category="systems">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--cyan-dim)">🏧</div>
+            <span class="card-status status-built">Built</span>
+          </div>
+          <div class="card-title">ATM Management System</div>
+          <div class="card-desc">Full ATM simulation with account management, PIN authentication, deposits, withdrawals, balance enquiries, and transaction history. Demonstrates core banking logic and OOP design.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-a">Java</span><span class="tag tag-g">OOP</span>
+          <span class="tag tag-c">Banking Logic</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">systems · finance</span>
+          <a href="https://github.com/Dylxnpeter" target="_blank" class="card-link">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Vehicle Management -->
+      <div class="project-card acc-green" data-category="systems">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--green-dim)">🚗</div>
+            <span class="card-status status-built">Built</span>
+          </div>
+          <div class="card-title">Vehicle Management System</div>
+          <div class="card-desc">Fleet and vehicle management covering registration, owner records, service scheduling, maintenance history, and reporting — with a relational database backend.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-a">Java</span><span class="tag tag-g">MySQL</span>
+          <span class="tag tag-c">Fleet Mgmt</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">systems · enterprise</span>
+          <a href="https://github.com/Dylxnpeter" target="_blank" class="card-link">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- E-Voting -->
+      <div class="project-card acc-purple" data-category="systems">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--purple-dim)">🗳️</div>
+            <span class="card-status status-built">Built</span>
+          </div>
+          <div class="card-title">Electronic Voting Management System</div>
+          <div class="card-desc">Secure digital voting platform with voter registration, candidate management, encrypted ballot casting, real-time tally, and immutable audit trail generation.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-a">Java</span><span class="tag tag-r">Security</span>
+          <span class="tag tag-g">Database</span><span class="tag tag-p">Audit Trail</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">systems · security</span>
+          <a href="https://github.com/Dylxnpeter" target="_blank" class="card-link">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Bonga Points -->
+      <div class="project-card acc-amber" data-category="enterprise">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--amber-dim)">🎁</div>
+            <span class="card-status status-built">Built</span>
+          </div>
+          <div class="card-title">Bonga Points Reward System</div>
+          <div class="card-desc">Loyalty and rewards management platform — points accrual, redemption engine, member tiers, transaction history, and reporting dashboard.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-a">Java</span><span class="tag tag-g">MySQL</span>
+          <span class="tag tag-c">Loyalty</span><span class="tag tag-p">Rewards</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">enterprise · systems</span>
+          <a href="https://github.com/Dylxnpeter" target="_blank" class="card-link">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Library System -->
+      <div class="project-card acc-green" data-category="systems">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--green-dim)">📚</div>
+            <span class="card-status status-built">Built</span>
+          </div>
+          <div class="card-title">Library Management System</div>
+          <div class="card-desc">Full library system with cataloguing, member registration, book borrowing and returns, overdue tracking, fine calculation, and stock reports.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-a">Java</span><span class="tag tag-g">MySQL</span>
+          <span class="tag tag-c">Cataloguing</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">systems · enterprise</span>
+          <a href="https://github.com/Dylxnpeter" target="_blank" class="card-link">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Keeping Hope Alive -->
+      <div class="project-card acc-coral" data-category="enterprise">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--coral-dim)">🌍</div>
+            <span class="card-status status-live">Live</span>
+          </div>
+          <div class="card-title">Keeping Hope Alive Foundation</div>
+          <div class="card-desc">Official website for a Kenyan non-profit — digitised letterheads, document management, public-facing site, and donor engagement pages.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-c">Web</span><span class="tag tag-g">Non-profit</span>
+          <span class="tag tag-p">Document Mgmt</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">enterprise · web</span>
+          <a href="#" class="card-link">Visit site →</a>
+        </div>
+      </div>
+
+      <!-- Wazuh SOC (Coming Soon) -->
+      <div class="project-card acc-coral" data-category="security" style="opacity:0.6">
+        <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--coral-dim)">🔍</div>
+            <span class="card-status status-wip">In Progress</span>
+          </div>
+          <div class="card-title">Wazuh SOC Home Lab</div>
+          <div class="card-desc">Self-hosted Security Operations Centre on Wazuh SIEM — log collection, threat detection rules, alert correlation, and live dashboards. Will be published when complete.</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-r">Wazuh</span><span class="tag tag-r">SIEM</span>
+          <span class="tag tag-r">Threat Detection</span><span class="tag tag-c">Linux</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">security</span>
+          <span class="card-link" style="color:var(--dim);cursor:default">Coming soon</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="sec-label reveal" style="justify-content:center">contact</div>
+    <h2 class="reveal">Let's build something.</h2>
+    <p class="sec-sub reveal" style="margin:0 auto 2.5rem;text-align:center">
+      Open to freelance projects, long-term contracts, and interesting engineering problems.
+    </p>
+
+    <div class="contact-terminal reveal">
+      <div class="term-bar">
+        <span class="tdot tdot-r"></span><span class="tdot tdot-y"></span><span class="tdot tdot-g"></span>
+        <span class="term-title">contact.json</span>
+      </div>
+      <div class="cterm-body">
+        <span class="ct-prompt">$</span> cat contact.json<br>
+        {<br>
+        &nbsp;&nbsp;<span class="ct-key">"name"</span>: <span class="ct-val">"Dylan Njang'iru"</span>,<br>
+        &nbsp;&nbsp;<span class="ct-key">"location"</span>: <span class="ct-val">"Nairobi, Kenya 🇰🇪"</span>,<br>
+        &nbsp;&nbsp;<span class="ct-key">"mobile"</span>: <span class="ct-val">"+254 710 940 211"</span>,<br>
+        &nbsp;&nbsp;<span class="ct-key">"email"</span>: <span class="ct-val">"dylan.njangiru23@outlook.com"</span>,<br>
+        &nbsp;&nbsp;<span class="ct-key">"status"</span>: <span class="ct-val">"<span style="color:var(--green)">available</span>"</span><br>
+        }
+      </div>
+    </div>
+
+    <div class="contact-cards reveal reveal-delay-1">
+      <a href="mailto:dylan.njangiru23@outlook.com" class="c-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        dylan.njangiru23@outlook.com
+      </a>
+      <a href="tel:+254710940211" class="c-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12c-.98-2.49-1.44-5.07-1.35-7.65A2 2 0 0 1 5.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L9.91 9.91a16 16 0 0 0 6.08 6.08l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        +254 710 940 211
+      </a>
+      <a href="https://github.com/Dylxnpeter" target="_blank" rel="noopener" class="c-card">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        Dylxnpeter
+      </a>
+      <a href="https://www.linkedin.com/in/dylan-peter-107437233" target="_blank" rel="noopener" class="c-card">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://www.fiverr.com/s/K38wYW8" target="_blank" rel="noopener" class="c-card">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M23.004 15.588a.996.996 0 1 0 .003-1.99.996.996 0 0 0-.003 1.99zm-1.77-3.665h-.92c-.64 0-.96.481-.96 1.442v4.627h-1.92v-6.04h-.96v-1.441h.96v-.481c0-.96.32-1.923.96-2.404.64-.48 1.28-.72 2.24-.72l1.28.16v1.44l-.64-.08c-.96 0-1.28.32-1.28 1.121v.964h1.92l-.68 1.412zm-5.127 0h-1.921v6.07H12.27v-6.07h-.96v-1.441h.96v-.64c0-.96.32-1.762.801-2.243.64-.48 1.44-.72 2.563-.72h1.44v1.442H15.5c-.64 0-1.12.32-1.12.962v1.199h1.92l-.193 1.441zm-5.928 1.962c0 .62.159 1.08.478 1.38.32.302.76.451 1.28.451l1.6-.16v1.44c-.64.16-1.12.32-1.76.32-1.12 0-1.921-.32-2.561-.96-.64-.64-.96-1.6-.96-2.722V7.808h1.923v7.077zm-4.806-3.403h1.921v6.07H5.373v-6.07h-.96V8.941h.96V7.5c0-.96.32-1.762.8-2.243.641-.48 1.44-.72 2.562-.72h1.44v1.44H8.9c-.64 0-1.12.32-1.12.962v1.04h1.92l-.16 1.503H7.78v6.07H5.853l.52-6.07zm-3.207-3.442a1.12 1.12 0 1 1 0-2.241 1.12 1.12 0 0 1 0 2.241zm-.96 9.512V8.941h1.92v7.511H1.206z"/></svg>
+        Fiverr
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>dylan.njangiru · nairobi, kenya · built with vanilla html/css/js · 2025</div>
+</footer>
+
+<!-- ─── SCRIPTS ─── -->
+<script>
+/* ── Terminal typewriter ── */
+const lines = [
+  { type:'prompt', text:'whoami' },
+  { type:'out',    text:'dylan.njangiru — software engineer' },
+  { type:'blank' },
+  { type:'prompt', text:'cat stack.json' },
+  { type:'out',    text:'{ languages: ["Python","Java","C#","TypeScript"] }' },
+  { type:'out',    text:'{ ai: ["GPT-4o","FastAPI","RAG","MLOps"] }' },
+  { type:'out',    text:'{ security: ["Wazuh","JWT","RLS","PII-Mask"] }' },
+  { type:'blank' },
+  { type:'prompt', text:'echo $STATUS' },
+  { type:'green',  text:'✓ Available for freelance work' },
+];
+
+const termEl = document.getElementById('terminal-output');
+let lineIdx = 0, charIdx = 0, outputHTML = '';
+
+function getLineHTML(line){
+  if(line.type==='blank') return '<br>';
+  if(line.type==='prompt') return `<span style="color:var(--purple-light)">dylan@nbi:~$</span> <span style="color:var(--cyan)">${line.text}</span>`;
+  if(line.type==='green') return `<span style="color:var(--green)">${line.text}</span>`;
+  return `<span style="color:var(--muted)">${line.text}</span>`;
+}
+
+function typeLine(){
+  if(lineIdx >= lines.length){ termEl.innerHTML = outputHTML; return; }
+  const line = lines[lineIdx];
+  if(line.type==='blank'){
+    outputHTML += '<br>';
+    lineIdx++; charIdx=0;
+    setTimeout(typeLine,100); return;
+  }
+  const full = getLineHTML(line);
+  if(line.type==='out'||line.type==='green'){
+    outputHTML += full + '<br>';
+    lineIdx++; charIdx=0;
+    termEl.innerHTML = outputHTML + '<span class="t-cursor"></span>';
+    setTimeout(typeLine, 40); return;
+  }
+  // animate prompt lines char by char (simplified: show whole line fast)
+  outputHTML += full + '<br>';
+  lineIdx++; charIdx=0;
+  termEl.innerHTML = outputHTML + '<span class="t-cursor"></span>';
+  setTimeout(typeLine, 200);
+}
+setTimeout(typeLine, 600);
+
+/* ── Scroll reveal ── */
+const reveals = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:0.12});
+reveals.forEach(el=>revealObs.observe(el));
+
+/* ── Skill bar animation ── */
+const fills = document.querySelectorAll('.skill-fill');
+const skillObs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.width = e.target.dataset.width+'%';
+      skillObs.unobserve(e.target);
+    }
+  });
+},{threshold:0.3});
+fills.forEach(f=>skillObs.observe(f));
+
+/* ── Project filter ── */
+const filterBtns = document.querySelectorAll('.filter-btn');
+const cards = document.querySelectorAll('.project-card');
+filterBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    filterBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    cards.forEach(c=>{
+      const cat = c.dataset.category||'';
+      if(f==='all'||cat.includes(f)){
+        c.classList.remove('hidden');
+      } else {
+        c.classList.add('hidden');
+      }
+    });
+  });
+});
+
+/* ── Nav active highlight on scroll ── */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  let current='';
+  sections.forEach(s=>{
+    if(window.scrollY >= s.offsetTop - 100) current=s.id;
+  });
+  navLinks.forEach(a=>{
+    a.style.color = a.getAttribute('href')==='#'+current ? 'var(--cyan)' : '';
+  });
+},{passive:true});
+</script>
+</body>
+</html>

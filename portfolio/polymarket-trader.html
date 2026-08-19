@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Polymarket Trader — Read-Only Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080F;--surface:#0D1421;--surface2:#131E30;--border:rgba(99,102,241,0.15);
+  --indigo:#6366F1;--indigo-dim:rgba(99,102,241,0.1);--indigo-light:#818CF8;
+  --green:#10B981;--green-dim:rgba(16,185,129,0.1);
+  --red:#EF4444;--red-dim:rgba(239,68,68,0.1);
+  --amber:#F59E0B;--amber-dim:rgba(245,158,11,0.1);
+  --cyan:#06B6D4;--cyan-dim:rgba(6,182,212,0.1);
+  --text:#E2E8F0;--muted:#94A3B8;--dim:#475569;--radius:12px;--radius-sm:8px
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(99,102,241,0.05),transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(6,182,212,0.03),transparent 60%);pointer-events:none;z-index:0}
+
+.topbar{background:rgba(13,20,33,0.95);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:52px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.topbar-logo{font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;color:var(--indigo-light)}
+.ro-badge{background:var(--amber-dim);border:1px solid rgba(245,158,11,0.3);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:var(--amber);letter-spacing:0.04em}
+.back-link{color:var(--muted);text-decoration:none;font-size:13px}.back-link:hover{color:var(--indigo-light)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+
+.hero{padding:3rem 2rem;max-width:1080px;margin:0 auto;position:relative;z-index:1}
+.hero-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--indigo-light);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.hero-label::before{content:'//';color:var(--dim)}
+h1{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;color:#fff;line-height:1.15;letter-spacing:-0.02em;margin-bottom:1rem}
+h1 span{background:linear-gradient(135deg,var(--indigo-light),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);line-height:1.8;max-width:680px;margin-bottom:2rem}
+.hero-tags{display:flex;gap:10px;flex-wrap:wrap}
+.hero-tag{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);color:var(--muted);background:var(--surface)}
+
+.main{max-width:1080px;margin:0 auto;padding:0 2rem 4rem;position:relative;z-index:1}
+
+/* SECTIONS */
+.section{margin-bottom:3rem}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--indigo-light);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.75rem;display:flex;align-items:center;gap:8px}
+.section-label::before{content:'//';color:var(--dim)}
+h2{font-size:1.4rem;font-weight:700;color:#fff;letter-spacing:-0.02em;margin-bottom:1rem}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1rem}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:#fff}
+.card-body{padding:16px}
+
+/* ARCH DIAGRAM */
+.arch-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:1.5rem 0}
+.arch-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 12px;text-align:center;position:relative}
+.arch-block::after{content:'→';position:absolute;right:-12px;top:50%;transform:translateY(-50%);color:var(--indigo-light);font-size:16px;z-index:1}
+.arch-block:last-child::after{display:none}
+.arch-icon{font-size:1.8rem;margin-bottom:8px}
+.arch-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:4px}
+.arch-desc{font-size:11px;color:var(--dim);line-height:1.5}
+.arch-tag{display:inline-block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:var(--indigo-dim);color:var(--indigo-light)}
+
+/* LOGIC STEPS */
+.logic-steps{display:flex;flex-direction:column;gap:0}
+.logic-step{display:flex;gap:16px;padding:16px;border-bottom:1px solid var(--border);transition:background 0.15s}
+.logic-step:last-child{border-bottom:none}
+.logic-step:hover{background:rgba(99,102,241,0.03)}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--indigo-dim);border:1px solid rgba(99,102,241,0.3);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--indigo-light);flex-shrink:0}
+.step-body{flex:1}
+.step-title{font-weight:600;color:#fff;font-size:14px;margin-bottom:4px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.7}
+.step-code{margin-top:8px;background:#030609;border:1px solid rgba(99,102,241,0.1);border-radius:var(--radius-sm);padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--indigo-light);line-height:1.8}
+.c-kw{color:#A78BFA}.c-fn{color:var(--cyan)}.c-str{color:var(--green)}.c-cm{color:var(--dim)}.c-num{color:var(--amber)}
+
+/* MARKET SIMULATOR */
+.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem}
+.market-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all 0.2s}
+.market-card:hover{border-color:var(--indigo);transform:translateY(-1px)}
+.market-card.selected{border-color:var(--indigo);background:var(--indigo-dim)}
+.market-q{font-size:13px;font-weight:600;color:#fff;margin-bottom:10px;line-height:1.4}
+.market-odds{display:flex;gap:8px;margin-bottom:10px}
+.odds-btn{flex:1;padding:8px;border-radius:var(--radius-sm);text-align:center;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;border:none}
+.odds-yes{background:var(--green-dim);color:var(--green)}.odds-yes:hover{background:rgba(16,185,129,0.2)}
+.odds-no{background:var(--red-dim);color:var(--red)}.odds-no:hover{background:rgba(239,68,68,0.2)}
+.odds-btn.active-yes{background:var(--green);color:#fff}
+.odds-btn.active-no{background:var(--red);color:#fff}
+.market-meta{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+.volume-bar{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:8px;overflow:hidden}
+.volume-fill{height:100%;background:linear-gradient(90deg,var(--indigo),var(--indigo-light));border-radius:2px}
+
+/* POSITION TABLE */
+.positions{display:flex;flex-direction:column;gap:10px}
+.position-row{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:grid;grid-template-columns:1fr auto auto auto auto;gap:12px;align-items:center;font-size:13px}
+.pos-market{font-weight:500;color:#fff;font-size:12px}
+.pos-side-yes{color:var(--green);font-weight:600;font-family:'JetBrains Mono',monospace}
+.pos-side-no{color:var(--red);font-weight:600;font-family:'JetBrains Mono',monospace}
+.pos-pnl-pos{color:var(--green);font-weight:700;font-family:'JetBrains Mono',monospace}
+.pos-pnl-neg{color:var(--red);font-weight:700;font-family:'JetBrains Mono',monospace}
+.pos-label{font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+
+/* RISK BOX */
+.risk-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.risk-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.risk-val{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
+.risk-label{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+
+/* CHART */
+.chart-wrap{position:relative;height:220px;margin-top:12px}
+
+/* PNL SIMULATOR */
+.sim-controls{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:flex-end;margin-bottom:1rem}
+.form-group{display:flex;flex-direction:column;gap:4px}
+label{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+input,select{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color 0.15s}
+input:focus,select:focus{border-color:var(--indigo)}select option{background:#0D1421}
+.btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--indigo);color:#fff}.btn-primary:hover{background:#4F46E5}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-outline:hover{color:var(--indigo-light);border-color:var(--indigo)}
+
+/* DISCLAIMER */
+.disclaimer{background:var(--amber-dim);border:1px solid rgba(245,158,11,0.25);border-radius:var(--radius-sm);padding:14px;font-size:12px;color:var(--amber);line-height:1.7;margin-bottom:2rem}
+
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;color:var(--text)}
+tr:last-child td{border-bottom:none}
+code{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--indigo-light)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">💹 Polymarket Trader</div>
+  <div class="topbar-right">
+    <span class="ro-badge">READ-ONLY EXPLAINER</span>
+    <a href="../index.html" class="back-link">← Portfolio</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">project deep-dive</div>
+  <h1>Automated prediction market<br>trading on <span>Polymarket</span></h1>
+  <p class="hero-desc">
+    A Python bot that scans Polymarket's decentralised prediction markets, identifies mispriced probabilities using statistical models, and executes trades automatically with defined risk controls — all without human intervention.
+  </p>
+  <div class="hero-tags">
+    <span class="hero-tag">Python</span>
+    <span class="hero-tag">Polymarket CLOB API</span>
+    <span class="hero-tag">Statistical Arbitrage</span>
+    <span class="hero-tag">Async HTTP</span>
+    <span class="hero-tag">Kelly Criterion</span>
+    <span class="hero-tag">Risk Management</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="disclaimer">
+    ⚠️ <strong>Read-Only Demo:</strong> This page explains the bot's logic and lets you simulate its decision-making. No real trades are placed here. Polymarket operates in jurisdictions where it is legally permitted — this project was built for research and educational purposes.
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <div class="section">
+    <div class="section-label">system architecture</div>
+    <h2>How the bot is structured</h2>
+    <div class="arch-flow">
+      <div class="arch-block">
+        <div class="arch-icon">🌐</div>
+        <div class="arch-name">Market Scanner</div>
+        <div class="arch-desc">Polls Polymarket CLOB API every 60s for active markets</div>
+        <span class="arch-tag">httpx + asyncio</span>
+      </div>
+      <div class="arch-block">
+        <div class="arch-icon">📊</div>
+        <div class="arch-name">Probability Engine</div>
+        <div class="arch-desc">Compares market odds vs model probability estimates</div>
+        <span class="arch-tag">scipy + numpy</span>
+      </div>
+      <div class="arch-block">
+        <div class="arch-icon">🎯</div>
+        <div class="arch-name">Signal Generator</div>
+        <div class="arch-desc">Emits BUY/SELL signals above edge threshold</div>
+        <span class="arch-tag">Kelly Criterion</span>
+      </div>
+      <div class="arch-block">
+        <div class="arch-icon">🛡️</div>
+        <div class="arch-name">Risk Manager</div>
+        <div class="arch-desc">Position sizing, max exposure, stop-loss checks</div>
+        <span class="arch-tag">Custom rules</span>
+      </div>
+      <div class="arch-block">
+        <div class="arch-icon">⚡</div>
+        <div class="arch-name">Order Executor</div>
+        <div class="arch-desc">Places limit orders via Polymarket API with wallet signing</div>
+        <span class="arch-tag">Web3.py + CLOB</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRADING LOGIC -->
+  <div class="section">
+    <div class="section-label">core logic</div>
+    <h2>The trading algorithm — step by step</h2>
+    <div class="card">
+      <div class="logic-steps">
+        <div class="logic-step">
+          <div class="step-num">01</div>
+          <div class="step-body">
+            <div class="step-title">Scan all active markets</div>
+            <div class="step-desc">The bot fetches all open prediction markets from the Polymarket CLOB API, filtering for markets with sufficient liquidity (volume > $10,000) and time remaining (> 24 hours to resolution).</div>
+            <div class="step-code"><span class="c-kw">async def</span> <span class="c-fn">scan_markets</span>():<br>&nbsp;&nbsp;markets = <span class="c-kw">await</span> clob.get_markets(status=<span class="c-str">"ACTIVE"</span>)<br>&nbsp;&nbsp;<span class="c-kw">return</span> [m <span class="c-kw">for</span> m <span class="c-kw">in</span> markets <span class="c-kw">if</span><br>&nbsp;&nbsp;&nbsp;&nbsp;m.volume &gt; <span class="c-num">10_000</span> <span class="c-kw">and</span> m.hours_left &gt; <span class="c-num">24</span>]</div>
+          </div>
+        </div>
+        <div class="logic-step">
+          <div class="step-num">02</div>
+          <div class="step-body">
+            <div class="step-title">Estimate true probability</div>
+            <div class="step-desc">For each market, the bot uses a combination of historical base rates, recent news sentiment (via news API), and crowd wisdom signals to estimate the "true" probability of YES resolving. This is compared to the current market price (which is itself a probability in CLOB markets).</div>
+            <div class="step-code"><span class="c-kw">def</span> <span class="c-fn">estimate_probability</span>(market, news_score):<br>&nbsp;&nbsp;base_rate = historical_base_rates[market.category]<br>&nbsp;&nbsp;sentiment_adj = news_score * <span class="c-num">0.15</span>  <span class="c-cm"># weight</span><br>&nbsp;&nbsp;<span class="c-kw">return</span> (base_rate * <span class="c-num">0.7</span>) + (market.current_price * <span class="c-num">0.15</span>) + sentiment_adj</div>
+          </div>
+        </div>
+        <div class="logic-step">
+          <div class="step-num">03</div>
+          <div class="step-body">
+            <div class="step-title">Calculate edge and position size</div>
+            <div class="step-desc">If the estimated probability differs from the market price by more than the edge threshold (default: 5%), a signal is generated. Position size is calculated using the Kelly Criterion, capped at the maximum allowed stake per trade.</div>
+            <div class="step-code"><span class="c-kw">def</span> <span class="c-fn">kelly_fraction</span>(p_true, p_market):<br>&nbsp;&nbsp;b = (<span class="c-num">1</span> / p_market) - <span class="c-num">1</span>  <span class="c-cm"># decimal odds</span><br>&nbsp;&nbsp;q = <span class="c-num">1</span> - p_true<br>&nbsp;&nbsp;kelly = (b * p_true - q) / b<br>&nbsp;&nbsp;<span class="c-kw">return</span> min(kelly * <span class="c-num">0.25</span>, MAX_STAKE_FRACTION)  <span class="c-cm"># quarter-Kelly</span></div>
+          </div>
+        </div>
+        <div class="logic-step">
+          <div class="step-num">04</div>
+          <div class="step-body">
+            <div class="step-title">Risk checks before execution</div>
+            <div class="step-desc">Before placing any order, the risk manager checks: daily loss limit not exceeded, no overconcentration in a single category, open positions count within limit, and portfolio correlation check to avoid correlated bets on the same underlying event.</div>
+            <div class="step-code"><span class="c-kw">def</span> <span class="c-fn">passes_risk_checks</span>(signal, portfolio):<br>&nbsp;&nbsp;<span class="c-kw">return</span> (<br>&nbsp;&nbsp;&nbsp;&nbsp;portfolio.daily_pnl &gt; -MAX_DAILY_LOSS <span class="c-kw">and</span><br>&nbsp;&nbsp;&nbsp;&nbsp;portfolio.open_positions &lt; MAX_POSITIONS <span class="c-kw">and</span><br>&nbsp;&nbsp;&nbsp;&nbsp;portfolio.category_exposure(signal.cat) &lt; MAX_CAT_EXPOSURE<br>&nbsp;&nbsp;)</div>
+          </div>
+        </div>
+        <div class="logic-step">
+          <div class="step-num">05</div>
+          <div class="step-body">
+            <div class="step-title">Execute limit order via CLOB API</div>
+            <div class="step-desc">Orders are placed as limit orders slightly inside the spread to avoid paying the full spread cost. The order is signed with the wallet's private key using EIP-712 and submitted to Polymarket's CLOB. The bot monitors fill status and cancels unfilled orders after a timeout.</div>
+            <div class="step-code"><span class="c-kw">async def</span> <span class="c-fn">place_order</span>(signal):<br>&nbsp;&nbsp;order = build_limit_order(<br>&nbsp;&nbsp;&nbsp;&nbsp;market_id=signal.market_id,<br>&nbsp;&nbsp;&nbsp;&nbsp;side=signal.side,  <span class="c-cm"># YES or NO</span><br>&nbsp;&nbsp;&nbsp;&nbsp;size=signal.size_usdc,<br>&nbsp;&nbsp;&nbsp;&nbsp;price=signal.limit_price  <span class="c-cm"># inside spread</span><br>&nbsp;&nbsp;)<br>&nbsp;&nbsp;signed = wallet.sign_order(order)  <span class="c-cm"># EIP-712</span><br>&nbsp;&nbsp;<span class="c-kw">return await</span> clob.post_order(signed)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE MARKET SIMULATOR -->
+  <div class="section">
+    <div class="section-label">interactive simulator</div>
+    <h2>Signal simulator — would the bot trade?</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:1.5rem">Click a market, adjust the estimated probability, and see whether the bot would generate a BUY/SELL signal, what position size it would take, and the expected value calculation.</p>
+
+    <div class="market-grid" id="market-grid"></div>
+
+    <div class="card">
+      <div class="card-hdr">⚙️ Signal Calculator</div>
+      <div class="card-body">
+        <div class="sim-controls">
+          <div class="form-group"><label>Selected Market</label><input id="sim-market" readonly style="color:var(--indigo-light)" placeholder="Click a market above…"/></div>
+          <div class="form-group"><label>Market Price (YES)</label><input type="number" id="sim-mkt-price" step="0.01" min="0.01" max="0.99" placeholder="0.00"/></div>
+          <div class="form-group"><label>Your Est. Probability</label><input type="number" id="sim-est-prob" step="0.01" min="0.01" max="0.99" placeholder="e.g. 0.72" oninput="calcSignal()"/></div>
+          <button class="btn btn-primary" onclick="calcSignal()">Calculate</button>
+        </div>
+        <div id="signal-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAMPLE POSITIONS -->
+  <div class="section">
+    <div class="section-label">sample portfolio</div>
+    <h2>Example open positions</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:1rem">Illustrative positions showing how the bot's portfolio would look. Not real trades.</p>
+    <div class="positions" id="positions-list"></div>
+  </div>
+
+  <!-- RISK DASHBOARD -->
+  <div class="section">
+    <div class="section-label">risk management</div>
+    <h2>Portfolio risk controls</h2>
+    <div class="risk-grid" style="margin-bottom:1.5rem">
+      <div class="risk-card"><div class="risk-val" style="color:var(--green)">$500</div><div class="risk-label">Max daily loss</div></div>
+      <div class="risk-card"><div class="risk-val" style="color:var(--amber)">15</div><div class="risk-label">Max open positions</div></div>
+      <div class="risk-card"><div class="risk-val" style="color:var(--indigo-light)">25%</div><div class="risk-label">Max category exposure</div></div>
+      <div class="risk-card"><div class="risk-val" style="color:var(--green)">5%</div><div class="risk-label">Min edge threshold</div></div>
+      <div class="risk-card"><div class="risk-val" style="color:var(--amber)">¼ Kelly</div><div class="risk-label">Position sizing</div></div>
+      <div class="risk-card"><div class="risk-val" style="color:var(--red)">$200</div><div class="risk-label">Max stake per trade</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">📈 Simulated P&L Curve (90-day backtest)</div>
+      <div class="card-body"><div class="chart-wrap"><canvas id="pnl-chart"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section">
+    <div class="section-label">implementation details</div>
+    <h2>Technical implementation</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Component</th><th>Technology</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>Market data fetch</td><td><code>httpx + asyncio</code></td><td>Async HTTP client for non-blocking API polling every 60 seconds</td></tr>
+          <tr><td>Probability model</td><td><code>scipy / numpy</code></td><td>Statistical modelling — base rates, Bayesian updates from news sentiment</td></tr>
+          <tr><td>Kelly sizing</td><td><code>Custom Python</code></td><td>Quarter-Kelly criterion for conservative position sizing</td></tr>
+          <tr><td>Order signing</td><td><code>web3.py + EIP-712</code></td><td>Cryptographic signing of orders with private key wallet</td></tr>
+          <tr><td>Order placement</td><td><code>Polymarket CLOB API</code></td><td>REST API for submitting, monitoring, and cancelling limit orders</td></tr>
+          <tr><td>State persistence</td><td><code>SQLite</code></td><td>Local storage of open positions, trade history, and daily P&L</td></tr>
+          <tr><td>Logging & alerts</td><td><code>Python logging + Telegram</code></td><td>Trade notifications via Telegram bot, error alerts on exceptions</td></tr>
+          <tr><td>Scheduling</td><td><code>APScheduler</code></td><td>Cron-style scheduling of market scan, position refresh, and cleanup jobs</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── MARKETS ──
+const MARKETS = [
+  {id:'M1',q:'Will Bitcoin exceed $100,000 by end of 2025?',yes:0.62,vol:284000,cat:'Crypto',days:180},
+  {id:'M2',q:'Will Kenya GDP growth exceed 5% in 2025?',yes:0.44,vol:38000,cat:'Economics',days:200},
+  {id:'M3',q:'Will OpenAI release GPT-5 before December 2025?',yes:0.71,vol:156000,cat:'Technology',days:150},
+  {id:'M4',q:'Will the Fed cut rates at least twice in H2 2025?',yes:0.55,vol:420000,cat:'Finance',days:120},
+  {id:'M5',q:'Will Nairobi Securities Exchange index rise >10% by year-end?',yes:0.38,vol:12000,cat:'Finance',days:170},
+  {id:'M6',q:'Will there be a major AI regulation bill passed in the EU by Q4 2025?',yes:0.68,vol:95000,cat:'Politics',days:140},
+];
+
+const POSITIONS = [
+  {market:'Will Bitcoin exceed $100k by end of 2025?',side:'YES',entry:0.58,current:0.62,size:150,contracts:259},
+  {market:'Will Fed cut rates twice in H2 2025?',side:'YES',entry:0.48,current:0.55,size:80,contracts:167},
+  {market:'Will OpenAI release GPT-5 before Dec 2025?',side:'NO',entry:0.34,current:0.29,size:100,contracts:294},
+  {market:'Will Kenya GDP growth exceed 5%?',side:'NO',entry:0.60,current:0.56,size:60,contracts:100},
+];
+
+let selectedMarket = null;
+
+function fmt(n,d=2){return Number(n).toFixed(d)}
+function fmtPct(n){return (n*100).toFixed(1)+'%'}
+function fmtUSD(n){return '$'+Math.abs(n).toFixed(2)}
+
+// ── MARKET GRID ──
+function renderMarkets(){
+  document.getElementById('market-grid').innerHTML = MARKETS.map(m=>`
+    <div class="market-card" id="mcard-${m.id}" onclick="selectMarket('${m.id}')">
+      <div class="market-q">${m.q}</div>
+      <div class="market-odds">
+        <div class="odds-btn odds-yes">YES ${fmtPct(m.yes)}</div>
+        <div class="odds-btn odds-no">NO ${fmtPct(1-m.yes)}</div>
+      </div>
+      <div class="market-meta">Vol: $${(m.vol/1000).toFixed(0)}k · ${m.days}d remaining · ${m.cat}</div>
+      <div class="volume-bar"><div class="volume-fill" style="width:${Math.min(m.vol/5000,100)}%"></div></div>
+    </div>`).join('');
+}
+
+function selectMarket(id){
+  selectedMarket = MARKETS.find(m=>m.id===id);
+  document.querySelectorAll('.market-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('mcard-'+id).classList.add('selected');
+  document.getElementById('sim-market').value = selectedMarket.q.substring(0,60)+'…';
+  document.getElementById('sim-mkt-price').value = selectedMarket.yes.toFixed(2);
+  document.getElementById('sim-est-prob').value = '';
+  document.getElementById('signal-result').innerHTML='';
+}
+
+// ── SIGNAL CALC ──
+function calcSignal(){
+  const pEst = parseFloat(document.getElementById('sim-est-prob').value);
+  const pMkt = parseFloat(document.getElementById('sim-mkt-price').value || (selectedMarket?.yes||0));
+  if(!pEst||!pMkt||!selectedMarket){
+    document.getElementById('signal-result').innerHTML='<div style="color:var(--dim);font-size:13px">Select a market and enter your estimated probability.</div>';
+    return;
+  }
+  const edge = pEst - pMkt;
+  const absEdge = Math.abs(edge);
+  const MIN_EDGE = 0.05;
+  const BANKROLL = 2000;
+  const MAX_STAKE = 200;
+
+  // Kelly
+  const side = edge > 0 ? 'YES' : 'NO';
+  const p = edge > 0 ? pEst : 1 - pEst;
+  const pMktSide = edge > 0 ? pMkt : 1 - pMkt;
+  const b = (1/pMktSide) - 1;
+  const q = 1 - p;
+  const kelly = Math.max(0,(b*p - q)/b);
+  const quarterKelly = kelly * 0.25;
+  const stakeRaw = quarterKelly * BANKROLL;
+  const stake = Math.min(stakeRaw, MAX_STAKE);
+  const ev = p*(1/pMktSide - 1)*stake - q*stake;
+  const signal = absEdge >= MIN_EDGE;
+
+  document.getElementById('signal-result').innerHTML = `
+    <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div style="background:var(--surface2);border:1px solid var(${signal?(edge>0?'--green':'--red'):'--border'});border-radius:var(--radius-sm);padding:14px;text-align:center">
+        <div style="font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:6px">SIGNAL</div>
+        <div style="font-size:22px;font-weight:700;color:var(${!signal?'--dim':edge>0?'--green':'--red'})">${!signal?'NO TRADE':side==='YES'?'BUY YES':'BUY NO'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">${signal?'Edge threshold met':'Below 5% edge threshold'}</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center">
+        <div style="font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:6px">EDGE</div>
+        <div style="font-size:22px;font-weight:700;color:${absEdge>=MIN_EDGE?'#A78BFA':'var(--dim)'}">${(absEdge*100).toFixed(1)}%</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Est: ${fmtPct(pEst)} vs Mkt: ${fmtPct(pMkt)}</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center">
+        <div style="font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:6px">${signal?'STAKE':'KELLY %'}</div>
+        <div style="font-size:22px;font-weight:700;color:${signal?'#fff':'var(--dim)'}">${signal?'$'+stake.toFixed(0):(quarterKelly*100).toFixed(2)+'%'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">${signal?'Quarter-Kelly on $2,000':'Would size if edge met'}</div>
+      </div>
+    </div>
+    ${signal?`<div style="margin-top:12px;background:${ev>=0?'var(--green-dim)':'var(--red-dim)'};border:1px solid ${ev>=0?'rgba(16,185,129,0.3)':'rgba(239,68,68,0.3)'};border-radius:var(--radius-sm);padding:12px;font-size:13px;color:${ev>=0?'var(--green)':'var(--red)'}">
+      Expected Value: <strong>${ev>=0?'+':''}$${ev.toFixed(2)}</strong> · Kelly fraction: <strong>${(quarterKelly*100).toFixed(2)}%</strong> · Stake: <strong>$${stake.toFixed(2)}</strong> · Limit price: <strong>${(pMktSide*(edge>0?0.99:1.01)).toFixed(3)}</strong>
+    </div>`:''}`;
+}
+
+// ── POSITIONS ──
+function renderPositions(){
+  document.getElementById('positions-list').innerHTML = POSITIONS.map(p=>{
+    const side = p.side==='YES';
+    const entryPrice = side ? p.entry : 1-p.entry;
+    const currPrice = side ? p.current : 1-p.current;
+    const pnl = (currPrice - entryPrice) * p.contracts;
+    const pnlPct = ((currPrice-entryPrice)/entryPrice*100);
+    return `<div class="position-row">
+      <div><div class="pos-market">${p.market}</div><div class="pos-label">entry: ${fmtPct(p.entry)} · ${p.contracts} contracts</div></div>
+      <div><div class="pos-label">Side</div><div class="${side?'pos-side-yes':'pos-side-no'}">${p.side}</div></div>
+      <div><div class="pos-label">Current</div><div style="font-weight:600;font-family:'JetBrains Mono',monospace">${fmtPct(p.current)}</div></div>
+      <div><div class="pos-label">Stake</div><div style="font-family:'JetBrains Mono',monospace">$${p.size}</div></div>
+      <div><div class="pos-label">P&L</div><div class="${pnl>=0?'pos-pnl-pos':'pos-pnl-neg'}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(2)} (${pnlPct>=0?'+':''}${pnlPct.toFixed(1)}%)</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── PNL CHART ──
+function renderPnlChart(){
+  const labels=[];const data=[];let cum=0;
+  for(let i=0;i<90;i++){
+    const d=new Date(2025,3,1);d.setDate(d.getDate()+i);
+    labels.push(d.toLocaleDateString('en',{month:'short',day:'numeric'}));
+    const daily=(Math.random()-0.38)*60;
+    cum+=daily;data.push(cum);
+  }
+  new Chart(document.getElementById('pnl-chart'),{
+    type:'line',
+    data:{labels,datasets:[{label:'Cumulative P&L ($)',data,borderColor:'rgba(99,102,241,0.8)',backgroundColor:'rgba(99,102,241,0.05)',borderWidth:2,pointRadius:0,tension:0.4,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(255,255,255,0.3)',maxTicksLimit:10,font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'rgba(255,255,255,0.3)',callback:v=>'$'+v.toFixed(0),font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+// INIT
+renderMarkets();renderPositions();renderPnlChart();
+</script>
+</body>
+</html>

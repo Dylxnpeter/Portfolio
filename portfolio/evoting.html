@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Electronic Voting Management System — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#05080F;--surface:#0B1120;--surface2:#111D33;--border:rgba(59,130,246,0.15);--blue:#3B82F6;--blue-dim:rgba(59,130,246,0.1);--green:#10B981;--green-dim:rgba(16,185,129,0.1);--amber:#F59E0B;--amber-dim:rgba(245,158,11,0.1);--red:#EF4444;--red-dim:rgba(239,68,68,0.1);--text:#E2E8F0;--muted:#94A3B8;--dim:#475569;--radius:10px;--radius-sm:6px}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(59,130,246,0.04),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(16,185,129,0.03),transparent 60%);pointer-events:none;z-index:0}
+
+.topbar{background:rgba(11,17,32,0.95);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:52px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.topbar-logo{font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;color:#fff}
+.seal{font-size:20px}
+.demo-badge{background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:var(--blue)}
+.back-link{color:var(--muted);text-decoration:none;font-size:13px}
+.back-link:hover{color:var(--blue)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+
+.app-shell{display:flex;height:calc(100vh - 52px);position:relative;z-index:1}
+.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto}
+.sidebar-section{padding:10px 0}
+.sidebar-label{font-size:10px;font-weight:600;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;padding:0 14px 6px;font-family:'JetBrains Mono',monospace}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all 0.15s;border-left:2px solid transparent}
+.nav-item:hover{background:var(--blue-dim);color:var(--blue)}
+.nav-item.active{background:var(--blue-dim);color:var(--blue);border-left-color:var(--blue)}
+
+.main{flex:1;overflow-y:auto;padding:1.5rem}
+.panel{display:none}.panel.active{display:block}
+.page-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px}
+.page-sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:1.5rem}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:#fff}
+.card-body{padding:16px}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.25rem}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.stat-label{font-size:10px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.stat-val{font-size:22px;font-weight:700;color:#fff;line-height:1;margin-bottom:3px}
+.stat-sub{font-size:11px;color:var(--muted)}
+.stat.blue{border-left:3px solid var(--blue)}.stat.green{border-left:3px solid var(--green)}.stat.amber{border-left:3px solid var(--amber)}.stat.red{border-left:3px solid var(--red)}
+
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:0.06em;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(59,130,246,0.03)}
+
+.badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-blue{background:var(--blue-dim);color:var(--blue)}.badge-green{background:var(--green-dim);color:var(--green)}.badge-amber{background:var(--amber-dim);color:var(--amber)}.badge-red{background:var(--red-dim);color:var(--red)}
+
+.btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#2563EB}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#059669}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#DC2626}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}.form-group.full{grid-column:1/-1}
+label{font-size:11px;font-weight:500;color:var(--dim)}
+input,select,textarea{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color 0.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+select option{background:#0B1120}
+
+/* BALLOT */
+.ballot-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:2rem}
+.ballot-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+.ballot-sub{font-size:12px;color:var(--muted);margin-bottom:1.25rem}
+.candidate-option{display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;margin-bottom:10px;background:transparent}
+.candidate-option:hover{border-color:var(--blue);background:var(--blue-dim)}
+.candidate-option.selected{border-color:var(--blue);background:var(--blue-dim)}
+.candidate-radio{width:20px;height:20px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.candidate-option.selected .candidate-radio{border-color:var(--blue)}
+.candidate-radio-inner{width:10px;height:10px;border-radius:50%;background:var(--blue);display:none}
+.candidate-option.selected .candidate-radio-inner{display:block}
+.candidate-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surface)}
+.candidate-name{font-weight:600;font-size:14px;color:#fff}
+.candidate-party{font-size:11px;color:var(--muted)}
+
+/* RESULTS BAR */
+.result-bar-wrap{margin-bottom:14px}
+.result-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px}
+.result-name{font-weight:500;color:#fff}
+.result-count{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px}
+.bar-track{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(0.4,0,0.2,1);background:linear-gradient(90deg,var(--blue),#60A5FA)}
+.bar-fill.green{background:linear-gradient(90deg,var(--green),#34D399)}
+.bar-fill.amber{background:linear-gradient(90deg,var(--amber),#FCD34D)}
+.bar-fill.red{background:linear-gradient(90deg,var(--red),#F87171)}
+.bar-fill.purple{background:linear-gradient(90deg,#7C3AED,#A78BFA)}
+
+/* AUDIT LOG */
+.audit-entry{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);display:flex;gap:12px}
+.audit-time{color:var(--dim);flex-shrink:0;width:70px}
+.audit-hash{color:var(--green);font-size:10px}
+
+/* VOTER BOOTH */
+.booth{max-width:600px;margin:0 auto}
+.booth-header{background:linear-gradient(135deg,#1E3A5F,#0B1F3A);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center;margin-bottom:1.5rem}
+.booth-seal{font-size:3rem;margin-bottom:0.5rem}
+.booth-title{font-size:20px;font-weight:700;color:#fff;margin-bottom:4px}
+.booth-sub{font-size:13px;color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);color:var(--text);border:1px solid var(--border);padding:12px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;z-index:1000;transform:translateY(60px);opacity:0;transition:all 0.3s;display:flex;align-items:center;gap:8px}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:min(480px,95vw);padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:16px;font-weight:700;color:#fff}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo"><span class="seal">🗳️</span> Electronic Voting Management System</div>
+  <div class="topbar-right"><span class="demo-badge">DEMO MODE</span><a href="../index.html" class="back-link">← Portfolio</a></div>
+</div>
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <div class="nav-item active" onclick="showPanel('dashboard')">🏠 Dashboard</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Voters</div>
+      <div class="nav-item" onclick="showPanel('voters')">👥 Voter Registry</div>
+      <div class="nav-item" onclick="showPanel('register-voter')">➕ Register Voter</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Elections</div>
+      <div class="nav-item" onclick="showPanel('elections')">📋 All Elections</div>
+      <div class="nav-item" onclick="showPanel('cast-vote')">✅ Cast Vote</div>
+      <div class="nav-item" onclick="showPanel('results')">📊 Live Results</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Integrity</div>
+      <div class="nav-item" onclick="showPanel('audit')">🔍 Audit Trail</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-title">Election Dashboard</div>
+      <div class="page-sub">// secure · encrypted · audited</div>
+      <div class="stats-row">
+        <div class="stat blue"><div class="stat-label">Registered Voters</div><div class="stat-val" id="d-voters">0</div><div class="stat-sub">Verified electorate</div></div>
+        <div class="stat green"><div class="stat-label">Votes Cast</div><div class="stat-val" id="d-votes">0</div><div class="stat-sub">This election</div></div>
+        <div class="stat amber"><div class="stat-label">Turnout</div><div class="stat-val" id="d-turnout">0%</div><div class="stat-sub">Of registered voters</div></div>
+        <div class="stat blue"><div class="stat-label">Active Elections</div><div class="stat-val" id="d-elections">0</div><div class="stat-sub">Currently open</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">Active Elections</div>
+        <table><thead><tr><th>Election ID</th><th>Title</th><th>Type</th><th>Candidates</th><th>Votes</th><th>Status</th><th></th></tr></thead>
+        <tbody id="dash-elections"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-hdr">Recent Audit Entries</div>
+        <div id="dash-audit"></div>
+      </div>
+    </div>
+
+    <!-- VOTERS -->
+    <div class="panel" id="panel-voters">
+      <div class="page-title">Voter Registry</div>
+      <div class="page-sub">// verified and registered electorate</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem">
+        <input id="voter-search" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--surface2);color:var(--text);outline:none" placeholder="Search voters…" oninput="renderVoters()"/>
+        <button class="btn btn-primary" onclick="showPanel('register-voter')">+ Register</button>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Voter ID</th><th>Name</th><th>National ID</th><th>Constituency</th><th>Voted</th><th>Status</th></tr></thead>
+        <tbody id="voters-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- REGISTER VOTER -->
+    <div class="panel" id="panel-register-voter">
+      <div class="page-title">Register Voter</div>
+      <div class="page-sub">// biometric verification simulated</div>
+      <div class="card card-body" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>First Name *</label><input id="rv-first" placeholder="e.g. Alice"/></div>
+          <div class="form-group"><label>Last Name *</label><input id="rv-last" placeholder="e.g. Odhiambo"/></div>
+          <div class="form-group"><label>National ID *</label><input id="rv-id" placeholder="e.g. 34567890"/></div>
+          <div class="form-group"><label>Date of Birth *</label><input type="date" id="rv-dob"/></div>
+          <div class="form-group"><label>Constituency *</label>
+            <select id="rv-const"><option>Westlands</option><option>Embakasi East</option><option>Langata</option><option>Starehe</option><option>Ruaraka</option><option>Kibra</option><option>Makadara</option></select>
+          </div>
+          <div class="form-group"><label>Phone</label><input id="rv-phone" placeholder="e.g. 0712000000"/></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="showPanel('voters')">Cancel</button>
+          <button class="btn btn-primary" onclick="registerVoter()">✓ Register Voter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ELECTIONS -->
+    <div class="panel" id="panel-elections">
+      <div class="page-title">Elections</div>
+      <div class="page-sub">// all elections in the system</div>
+      <div class="card">
+        <table><thead><tr><th>Election ID</th><th>Title</th><th>Type</th><th>Start</th><th>End</th><th>Candidates</th><th>Votes</th><th>Status</th></tr></thead>
+        <tbody id="elections-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- CAST VOTE -->
+    <div class="panel" id="panel-cast-vote">
+      <div class="booth">
+        <div class="booth-header">
+          <div class="booth-seal">🏛️</div>
+          <div class="booth-title">Secure Voting Booth</div>
+          <div class="booth-sub">Your vote is encrypted and anonymous</div>
+        </div>
+        <div id="vote-auth" class="card card-body" style="padding:20px">
+          <div style="font-weight:600;color:#fff;margin-bottom:12px">Voter Authentication</div>
+          <div class="form-group" style="margin-bottom:10px"><label>Voter ID</label><input id="vote-voter-id" placeholder="e.g. VTR-001"/></div>
+          <div class="form-group" style="margin-bottom:16px"><label>Select Election</label>
+            <select id="vote-election-sel"></select>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="loadBallot()">Proceed to Ballot →</button>
+        </div>
+        <div id="vote-ballot" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="panel" id="panel-results">
+      <div class="page-title">Live Results</div>
+      <div class="page-sub">// real-time tally · auto-refreshing</div>
+      <div class="form-group" style="max-width:300px;margin-bottom:1.25rem">
+        <label>Select Election</label>
+        <select id="results-election-sel" onchange="renderResults()"></select>
+      </div>
+      <div id="results-output"></div>
+    </div>
+
+    <!-- AUDIT -->
+    <div class="panel" id="panel-audit">
+      <div class="page-title">Audit Trail</div>
+      <div class="page-sub">// immutable cryptographic log · SHA-256 chained</div>
+      <div class="card">
+        <div class="card-hdr">System Audit Log <span style="font-weight:400;color:var(--dim);font-size:11px">— every action recorded</span></div>
+        <div id="audit-full"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">🔐 Confirm Your Vote</span><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div id="confirm-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Back</button>
+      <button class="btn btn-green" onclick="submitVote()">✓ Submit Vote</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──
+let voters=[
+  {id:'VTR-001',first:'James',last:'Mwangi',natId:'23456781',dob:'1985-03-12',const:'Westlands',phone:'0712001001',voted:{},status:'Active'},
+  {id:'VTR-002',first:'Fatuma',last:'Hassan',natId:'34567892',dob:'1990-07-22',const:'Langata',phone:'0723002002',voted:{},status:'Active'},
+  {id:'VTR-003',first:'David',last:'Otieno',natId:'45678903',dob:'1978-11-05',const:'Kibra',phone:'0700003003',voted:{},status:'Active'},
+  {id:'VTR-004',first:'Winnie',last:'Kamau',natId:'56789014',dob:'1995-05-18',const:'Starehe',phone:'0711004004',voted:{},status:'Active'},
+  {id:'VTR-005',first:'Brian',last:'Mutua',natId:'67890125',dob:'1988-09-30',const:'Embakasi East',phone:'0722005005',voted:{},status:'Active'},
+  {id:'VTR-006',first:'Agnes',last:'Njoroge',natId:'78901236',dob:'1982-02-14',const:'Ruaraka',phone:'0733006006',voted:{},status:'Active'},
+];
+
+const elections=[
+  {id:'ELC-001',title:'Student Council President 2025',type:'University',start:'2025-06-01',end:'2025-07-31',status:'Open',
+   candidates:[
+    {id:'C1',name:'Alice Wanjiku',party:'Progress Party',emoji:'👩'},
+    {id:'C2',name:'Brian Omondi',party:'Unity Alliance',emoji:'👨'},
+    {id:'C3',name:'Carol Maina',party:'Innovation Front',emoji:'👩'},
+    {id:'C4',name:'Dennis Koech',party:'Independent',emoji:'👨'},
+  ]},
+  {id:'ELC-002',title:'County Board Election',type:'County',start:'2025-05-01',end:'2025-06-30',status:'Closed',
+   candidates:[
+    {id:'C5',name:'Faith Achieng',party:'Democratic Party',emoji:'👩'},
+    {id:'C6',name:'George Kirui',party:'Republican Front',emoji:'👨'},
+    {id:'C7',name:'Helen Waweru',party:'Green Alliance',emoji:'👩'},
+  ]},
+];
+
+let votes=[];
+let auditLog=[];
+let voterCounter=7;
+let pendingVote=null;
+
+function hash(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charCodeAt(i)|0;return Math.abs(h).toString(16).padStart(16,'0')}
+function time(){return new Date().toLocaleTimeString()}
+function fmt(n){return Number(n).toLocaleString()}
+function addAudit(action,detail=''){
+  const entry={time:time(),action,detail,hash:hash(action+detail+Date.now())};
+  auditLog.unshift(entry);
+  renderAuditWidget();
+}
+function toast(msg,icon='✅'){const t=document.getElementById('toast');t.innerHTML=`${icon} ${msg}`;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function closeModal(){document.getElementById('confirm-modal').classList.remove('open')}
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelector(`[onclick="showPanel('${name}')"]`)?.classList.add('active');
+  if(name==='dashboard')renderDashboard();
+  if(name==='voters')renderVoters();
+  if(name==='elections')renderElections();
+  if(name==='cast-vote')populateVoteSelects();
+  if(name==='results')populateResultsSelect();
+  if(name==='audit')renderFullAudit();
+}
+
+function getElectionVotes(eid){return votes.filter(v=>v.electionId===eid)}
+function candidateVotes(eid,cid){return votes.filter(v=>v.electionId===eid&&v.candidateId===cid).length}
+
+// ── DASHBOARD ──
+function renderDashboard(){
+  const totalVotes=votes.length;
+  document.getElementById('d-voters').textContent=voters.length;
+  document.getElementById('d-votes').textContent=totalVotes;
+  document.getElementById('d-turnout').textContent=Math.round((totalVotes/Math.max(voters.length,1))*100)+'%';
+  document.getElementById('d-elections').textContent=elections.filter(e=>e.status==='Open').length;
+  document.getElementById('dash-elections').innerHTML=elections.map(e=>`
+    <tr><td><code style="font-size:11px;color:var(--blue)">${e.id}</code></td><td>${e.title}</td><td>${e.type}</td><td>${e.candidates.length}</td><td>${getElectionVotes(e.id).length}</td>
+    <td><span class="badge badge-${e.status==='Open'?'green':'red'}">${e.status}</span></td>
+    <td><button class="btn btn-outline btn-sm" onclick="showPanel('results')">Results</button></td></tr>`).join('');
+  renderAuditWidget();
+}
+
+function renderAuditWidget(){
+  document.getElementById('dash-audit').innerHTML=auditLog.slice(0,5).map(e=>`
+    <div class="audit-entry"><span class="audit-time">${e.time}</span><span>${e.action}</span><span class="audit-hash">#${e.hash.substring(0,12)}</span></div>`).join('')||'<div style="padding:1rem;color:var(--dim);font-size:12px;text-align:center">No audit entries yet.</div>';
+}
+
+// ── VOTERS ──
+function renderVoters(q=''){
+  const f=(document.getElementById('voter-search')?.value||q).toLowerCase();
+  const filtered=voters.filter(v=>!f||`${v.first} ${v.last} ${v.id} ${v.natId}`.toLowerCase().includes(f));
+  const hasVoted=v=>Object.keys(v.voted).length>0;
+  document.getElementById('voters-table').innerHTML=filtered.map(v=>`
+    <tr><td><code style="font-size:11px;color:var(--blue)">${v.id}</code></td><td>${v.first} ${v.last}</td><td>${v.natId}</td><td>${v.const}</td>
+    <td>${hasVoted(v)?`<span class="badge badge-green">Voted</span>`:`<span class="badge badge-amber">Not yet</span>`}</td>
+    <td><span class="badge badge-${v.status==='Active'?'green':'red'}">${v.status}</span></td></tr>`).join('');
+}
+
+function registerVoter(){
+  const first=document.getElementById('rv-first').value.trim();
+  const last=document.getElementById('rv-last').value.trim();
+  const natId=document.getElementById('rv-id').value.trim();
+  const dob=document.getElementById('rv-dob').value;
+  if(!first||!last||!natId||!dob){toast('Fill all required fields','⚠️');return;}
+  if(voters.find(v=>v.natId===natId)){toast('Voter with this ID already registered','❌');return;}
+  const id=`VTR-00${voterCounter++}`;
+  voters.push({id,first,last,natId,dob,const:document.getElementById('rv-const').value,phone:document.getElementById('rv-phone').value,voted:{},status:'Active'});
+  addAudit('VOTER_REGISTERED',`${id} — ${first} ${last}`);
+  ['rv-first','rv-last','rv-id','rv-dob','rv-phone'].forEach(i=>document.getElementById(i).value='');
+  toast(`${first} ${last} registered as ${id}`);
+  showPanel('voters');
+}
+
+// ── ELECTIONS ──
+function renderElections(){
+  document.getElementById('elections-table').innerHTML=elections.map(e=>`
+    <tr><td><code style="font-size:11px;color:var(--blue)">${e.id}</code></td><td>${e.title}</td><td>${e.type}</td>
+    <td>${e.start}</td><td>${e.end}</td><td>${e.candidates.length}</td><td>${getElectionVotes(e.id).length}</td>
+    <td><span class="badge badge-${e.status==='Open'?'green':'red'}">${e.status}</span></td></tr>`).join('');
+}
+
+// ── VOTING ──
+function populateVoteSelects(){
+  const open=elections.filter(e=>e.status==='Open');
+  document.getElementById('vote-election-sel').innerHTML=open.map(e=>`<option value="${e.id}">${e.title}</option>`).join('');
+  document.getElementById('vote-ballot').style.display='none';
+  document.getElementById('vote-auth').style.display='block';
+}
+
+function loadBallot(){
+  const vid=document.getElementById('vote-voter-id').value.trim().toUpperCase();
+  const eid=document.getElementById('vote-election-sel').value;
+  const voter=voters.find(v=>v.id===vid);
+  const election=elections.find(e=>e.id===eid);
+  if(!voter){toast('Voter ID not found','❌');return;}
+  if(voter.voted[eid]){toast('You have already voted in this election','❌');return;}
+  if(!election||election.status!=='Open'){toast('This election is not open','❌');return;}
+  addAudit('BALLOT_ACCESSED',`${vid} → ${eid}`);
+  document.getElementById('vote-auth').style.display='none';
+  const ballot=document.getElementById('vote-ballot');
+  ballot.style.display='block';
+  ballot.innerHTML=`
+    <div class="ballot-card">
+      <div class="ballot-title">${election.title}</div>
+      <div class="ballot-sub">Select ONE candidate. Your choice is final.</div>
+      ${election.candidates.map(c=>`
+        <div class="candidate-option" id="opt-${c.id}" onclick="selectCandidate('${c.id}','${eid}','${vid}')">
+          <div class="candidate-radio"><div class="candidate-radio-inner"></div></div>
+          <div class="candidate-avatar">${c.emoji}</div>
+          <div><div class="candidate-name">${c.name}</div><div class="candidate-party">${c.party}</div></div>
+        </div>`).join('')}
+      <div style="margin-top:1rem;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="populateVoteSelects()">Cancel</button>
+        <button class="btn btn-green" id="submit-vote-btn" onclick="confirmVote()" disabled style="opacity:0.4">Submit Vote</button>
+      </div>
+    </div>`;
+  pendingVote={voterId:vid,electionId:eid,candidateId:null};
+}
+
+function selectCandidate(cid,eid,vid){
+  document.querySelectorAll('.candidate-option').forEach(o=>o.classList.remove('selected'));
+  document.getElementById('opt-'+cid).classList.add('selected');
+  pendingVote={voterId:vid,electionId:eid,candidateId:cid};
+  const btn=document.getElementById('submit-vote-btn');
+  btn.disabled=false;btn.style.opacity='1';
+}
+
+function confirmVote(){
+  if(!pendingVote?.candidateId){return;}
+  const election=elections.find(e=>e.id===pendingVote.electionId);
+  const candidate=election.candidates.find(c=>c.id===pendingVote.candidateId);
+  document.getElementById('confirm-body').innerHTML=`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Election</div>
+      <div style="font-weight:600;color:#fff;margin-bottom:12px">${election.title}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Your choice</div>
+      <div style="font-size:18px;font-weight:700;color:var(--green)">${candidate.emoji} ${candidate.name}</div>
+      <div style="font-size:12px;color:var(--muted)">${candidate.party}</div>
+    </div>
+    <div style="font-size:12px;color:var(--amber)">⚠️ This action cannot be undone. Your encrypted vote will be recorded.</div>`;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+
+function submitVote(){
+  const election=elections.find(e=>e.id===pendingVote.electionId);
+  const candidate=election.candidates.find(c=>c.id===pendingVote.candidateId);
+  const voter=voters.find(v=>v.id===pendingVote.voterId);
+  voter.voted[pendingVote.electionId]=true;
+  votes.push({...pendingVote,timestamp:time(),hash:hash(pendingVote.voterId+pendingVote.candidateId+Date.now())});
+  addAudit('VOTE_CAST',`${pendingVote.voterId} → ${election.id} [ENCRYPTED]`);
+  closeModal();
+  document.getElementById('vote-ballot').innerHTML=`
+    <div style="text-align:center;padding:2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+      <div style="font-size:3rem;margin-bottom:1rem">✅</div>
+      <div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:0.5rem">Vote Submitted Successfully</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:1rem">Your vote for <strong>${candidate.name}</strong> has been encrypted and recorded.</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);background:var(--surface2);padding:8px 12px;border-radius:4px;margin-bottom:1.5rem">Receipt: #${hash(pendingVote.voterId+Date.now()).substring(0,16).toUpperCase()}</div>
+      <button class="btn btn-primary" onclick="populateVoteSelects()">Vote in Another Election</button>
+    </div>`;
+  toast(`Vote for ${candidate.name} submitted`,'✅');
+  renderDashboard();
+}
+
+// ── RESULTS ──
+function populateResultsSelect(){
+  document.getElementById('results-election-sel').innerHTML=elections.map(e=>`<option value="${e.id}">${e.title}</option>`).join('');
+  renderResults();
+}
+function renderResults(){
+  const eid=document.getElementById('results-election-sel').value;
+  const election=elections.find(e=>e.id===eid);
+  const totalVotes=getElectionVotes(eid).length;
+  const colors=['','green','amber','red','purple'];
+  const ranked=[...election.candidates].map(c=>({...c,count:candidateVotes(eid,c.id)})).sort((a,b)=>b.count-a.count);
+  document.getElementById('results-output').innerHTML=`
+    <div class="card card-body" style="padding:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+        <div><div style="font-weight:700;font-size:15px;color:#fff">${election.title}</div><div style="font-size:12px;color:var(--muted)">${totalVotes} vote${totalVotes!==1?'s':''} cast</div></div>
+        <span class="badge badge-${election.status==='Open'?'green':'red'}">${election.status}</span>
+      </div>
+      ${ranked.map((c,i)=>{
+        const pct=totalVotes?Math.round((c.count/totalVotes)*100):0;
+        const barCls=i===0&&totalVotes?'':colors[i+1]||'';
+        return `<div class="result-bar-wrap">
+          <div class="result-meta">
+            <div class="result-name">${i===0&&totalVotes?'🏆 ':c.emoji+' '}${c.name} <span style="font-size:11px;color:var(--dim)">(${c.party})</span></div>
+            <div class="result-count">${c.count} votes · ${pct}%</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill ${i===0&&totalVotes?'':barCls}" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('')}
+      ${!totalVotes?`<div style="text-align:center;padding:1.5rem;color:var(--dim);font-size:13px">No votes cast yet. <a href="#" onclick="showPanel('cast-vote')" style="color:var(--blue)">Cast the first vote →</a></div>`:''}
+    </div>`;
+}
+
+// ── AUDIT ──
+function renderFullAudit(){
+  document.getElementById('audit-full').innerHTML=auditLog.length?auditLog.map(e=>`
+    <div class="audit-entry"><span class="audit-time">${e.time}</span><span style="color:#fff;font-weight:500">${e.action}</span><span style="color:var(--muted);flex:1">${e.detail}</span><span class="audit-hash">#${e.hash.substring(0,16)}</span></div>`).join(''):`<div style="padding:2rem;text-align:center;color:var(--dim);font-size:13px">No audit entries yet. System actions will appear here.</div>`;
+}
+
+// ── INIT ──
+addAudit('SYSTEM_START','Electronic Voting Management System initialised');
+addAudit('ELECTION_LOADED','ELC-001 — Student Council President 2025');
+addAudit('ELECTION_LOADED','ELC-002 — County Board Election');
+renderDashboard();
+</script>
+</body>
+</html>

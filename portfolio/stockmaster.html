@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StockMaster Pro — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface2:#F1F5F9;--border:#E2E8F0;--text:#1E293B;--muted:#64748B;--dim:#94A3B8;--blue:#2563EB;--blue-dim:#DBEAFE;--green:#059669;--green-dim:#D1FAE5;--amber:#D97706;--amber-dim:#FEF3C7;--red:#DC2626;--red-dim:#FEE2E2;--teal:#0891B2;--teal-dim:#CFFAFE;--radius:10px;--radius-sm:6px}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+
+.topbar{background:var(--blue);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:52px;position:sticky;top:0;z-index:100}
+.topbar-logo{font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;color:#fff}
+.demo-badge{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:#fff}
+.back-link{color:rgba(255,255,255,0.8);text-decoration:none;font-size:13px}.back-link:hover{color:#fff}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+
+.app-shell{display:flex;height:calc(100vh - 52px)}
+.sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto}
+.sidebar-section{padding:8px 0}
+.sidebar-label{font-size:10px;font-weight:600;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;padding:0 14px 6px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all 0.15s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--blue-dim);color:var(--blue)}.nav-item.active{background:var(--blue-dim);color:var(--blue);border-left-color:var(--blue)}
+
+.main{flex:1;overflow-y:auto;padding:1.5rem}
+.panel{display:none}.panel.active{display:block}
+.page-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:2px}
+.page-sub{font-size:12px;color:var(--muted);margin-bottom:1.25rem}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:1.25rem}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.stat-l{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.stat-v{font-size:22px;font-weight:700;color:var(--text);line-height:1;margin-bottom:3px}
+.stat-s{font-size:11px;color:var(--muted)}
+.stat.blue{border-left:3px solid var(--blue)}.stat.green{border-left:3px solid var(--green)}.stat.amber{border-left:3px solid var(--amber)}.stat.red{border-left:3px solid var(--red)}.stat.teal{border-left:3px solid var(--teal)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:13px}
+
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:9px 12px;text-align:left;background:#FAFAFA;border-bottom:1px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid #F1F5F9;font-size:12px;color:var(--text)}
+tr:last-child td{border-bottom:none}tr:hover td{background:#F8FAFC}
+
+.badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:var(--green-dim);color:var(--green)}.badge-amber{background:var(--amber-dim);color:var(--amber)}.badge-red{background:var(--red-dim);color:var(--red)}.badge-blue{background:var(--blue-dim);color:var(--blue)}.badge-teal{background:var(--teal-dim);color:var(--teal)}
+
+.btn{padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#1D4ED8}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-amber{background:var(--amber-dim);color:var(--amber);border:1px solid #FDE68A}.btn-green{background:var(--green-dim);color:var(--green);border:1px solid #A7F3D0}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:500;color:var(--muted)}
+input,select{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color 0.15s}
+input:focus,select:focus{border-color:var(--blue)}
+
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.chart-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px}
+.chart-wrap{position:relative;height:200px}
+
+.stock-level{height:6px;background:#F1F5F9;border-radius:3px;overflow:hidden;margin-top:4px}
+.stock-fill{height:100%;border-radius:3px}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--text);color:#fff;padding:10px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;z-index:1000;transform:translateY(60px);opacity:0;transition:all 0.3s}
+.toast.show{transform:translateY(0);opacity:1}
+
+.alert-banner{background:var(--amber-dim);border:1px solid #FDE68A;border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--amber);margin-bottom:1rem;font-weight:500}
+
+/* PO card */
+.po-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px}
+.po-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.po-id{font-weight:600;font-size:13px;color:var(--text)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">📦 StockMaster Pro<span class="demo-badge">DEMO</span></div>
+  <div class="topbar-right"><a href="../index.html" class="back-link">← Portfolio</a></div>
+</div>
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <div class="nav-item active" onclick="showPanel('dashboard')">🏠 Dashboard</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Inventory</div>
+      <div class="nav-item" onclick="showPanel('products')">📦 All Products</div>
+      <div class="nav-item" onclick="showPanel('add-product')">➕ Add Product</div>
+      <div class="nav-item" onclick="showPanel('low-stock')">⚠️ Low Stock Alerts</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Orders</div>
+      <div class="nav-item" onclick="showPanel('purchase-orders')">🛒 Purchase Orders</div>
+      <div class="nav-item" onclick="showPanel('new-po')">📝 New Purchase Order</div>
+      <div class="nav-item" onclick="showPanel('stock-movement')">↕️ Stock Movement</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Suppliers</div>
+      <div class="nav-item" onclick="showPanel('suppliers')">🏭 Suppliers</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Reports</div>
+      <div class="nav-item" onclick="showPanel('reports')">📊 Reports</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-title">Inventory Dashboard</div>
+      <div class="page-sub">Real-time stock overview</div>
+      <div id="dash-alerts"></div>
+      <div class="stats-row">
+        <div class="stat blue"><div class="stat-l">Total SKUs</div><div class="stat-v" id="d-skus">0</div><div class="stat-s">Products tracked</div></div>
+        <div class="stat green"><div class="stat-l">Stock Value (KES)</div><div class="stat-v" id="d-value">0</div><div class="stat-s">Current inventory</div></div>
+        <div class="stat amber"><div class="stat-l">Low Stock</div><div class="stat-v" id="d-low">0</div><div class="stat-s">Need reorder</div></div>
+        <div class="stat red"><div class="stat-l">Out of Stock</div><div class="stat-v" id="d-oos">0</div><div class="stat-s">Zero inventory</div></div>
+        <div class="stat teal"><div class="stat-l">Open POs</div><div class="stat-v" id="d-pos">0</div><div class="stat-s">Pending orders</div></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card"><div class="chart-title">Stock by Category</div><div class="chart-wrap"><canvas id="chart-cat"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Top 5 by Value</div><div class="chart-wrap"><canvas id="chart-value"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">Recent Stock Movements<button class="btn btn-outline btn-sm" onclick="showPanel('stock-movement')">View All</button></div>
+        <table><thead><tr><th>Date</th><th>Product</th><th>Type</th><th>Qty</th><th>Reference</th><th>Balance</th></tr></thead>
+        <tbody id="dash-movements"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="panel" id="panel-products">
+      <div class="page-title">All Products</div>
+      <div class="page-sub">Complete inventory list</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+        <input id="prod-search" style="flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none" placeholder="Search SKU or product…" oninput="renderProducts()"/>
+        <select id="prod-cat-filter" onchange="renderProducts()" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px"><option value="">All Categories</option></select>
+        <button class="btn btn-primary" onclick="showPanel('add-product')">+ Add Product</button>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>SKU</th><th>Product Name</th><th>Category</th><th>In Stock</th><th>Reorder Pt.</th><th>Unit Cost</th><th>Stock Value</th><th>Status</th><th></th></tr></thead>
+        <tbody id="products-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ADD PRODUCT -->
+    <div class="panel" id="panel-add-product">
+      <div class="page-title">Add New Product</div>
+      <div class="page-sub">Register a new SKU in inventory</div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>Product Name *</label><input id="ap-name" placeholder="e.g. Carton Box 40x30cm"/></div>
+          <div class="form-group"><label>SKU *</label><input id="ap-sku" placeholder="e.g. BOX-040"/></div>
+          <div class="form-group"><label>Category *</label>
+            <select id="ap-cat"><option>Packaging</option><option>Containers</option><option>Labels</option><option>Machinery</option><option>Consumables</option><option>Raw Materials</option><option>Finished Goods</option></select>
+          </div>
+          <div class="form-group"><label>Supplier *</label><select id="ap-supplier"></select></div>
+          <div class="form-group"><label>Unit Cost (KES) *</label><input type="number" id="ap-cost" placeholder="e.g. 350"/></div>
+          <div class="form-group"><label>Selling Price (KES)</label><input type="number" id="ap-price" placeholder="e.g. 480"/></div>
+          <div class="form-group"><label>Opening Stock *</label><input type="number" id="ap-stock" placeholder="e.g. 500"/></div>
+          <div class="form-group"><label>Reorder Point *</label><input type="number" id="ap-reorder" placeholder="e.g. 100"/></div>
+          <div class="form-group"><label>Unit of Measure</label><select id="ap-uom"><option>Units</option><option>Kg</option><option>Litres</option><option>Metres</option><option>Rolls</option><option>Sheets</option></select></div>
+          <div class="form-group"><label>Location / Bin</label><input id="ap-location" placeholder="e.g. Warehouse A, Shelf 3"/></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="showPanel('products')">Cancel</button>
+          <button class="btn btn-primary" onclick="addProduct()">✓ Add Product</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW STOCK -->
+    <div class="panel" id="panel-low-stock">
+      <div class="page-title">Low Stock Alerts</div>
+      <div class="page-sub">Products at or below reorder point</div>
+      <div class="card">
+        <table><thead><tr><th>SKU</th><th>Product</th><th>In Stock</th><th>Reorder Pt.</th><th>Supplier</th><th>Unit Cost</th><th>Action</th></tr></thead>
+        <tbody id="low-stock-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PURCHASE ORDERS -->
+    <div class="panel" id="panel-purchase-orders">
+      <div class="page-title">Purchase Orders</div>
+      <div class="page-sub">All procurement orders</div>
+      <div style="margin-bottom:1rem;display:flex;justify-content:flex-end">
+        <button class="btn btn-primary" onclick="showPanel('new-po')">+ New PO</button>
+      </div>
+      <div id="po-list"></div>
+    </div>
+
+    <!-- NEW PO -->
+    <div class="panel" id="panel-new-po">
+      <div class="page-title">New Purchase Order</div>
+      <div class="page-sub">Create a procurement order</div>
+      <div class="card" style="padding:20px">
+        <div class="form-grid">
+          <div class="form-group"><label>Supplier *</label><select id="po-supplier"></select></div>
+          <div class="form-group"><label>Expected Delivery</label><input type="date" id="po-date"/></div>
+          <div class="form-group"><label>Product *</label><select id="po-product"></select></div>
+          <div class="form-group"><label>Quantity *</label><input type="number" id="po-qty" placeholder="e.g. 500"/></div>
+          <div class="form-group"><label>Unit Price (KES) *</label><input type="number" id="po-price" placeholder="Auto-fills from product"/></div>
+          <div class="form-group"><label>Notes</label><input id="po-notes" placeholder="Optional"/></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="showPanel('purchase-orders')">Cancel</button>
+          <button class="btn btn-primary" onclick="createPO()">Create Purchase Order</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOCK MOVEMENT -->
+    <div class="panel" id="panel-stock-movement">
+      <div class="page-title">Stock Movement</div>
+      <div class="page-sub">Record inbound/outbound stock</div>
+      <div class="card" style="padding:20px;margin-bottom:1.25rem">
+        <div class="form-grid">
+          <div class="form-group"><label>Product *</label><select id="mv-product"></select></div>
+          <div class="form-group"><label>Movement Type *</label>
+            <select id="mv-type"><option>Stock In (Receive)</option><option>Stock Out (Issue)</option><option>Adjustment</option><option>Return</option></select>
+          </div>
+          <div class="form-group"><label>Quantity *</label><input type="number" id="mv-qty" placeholder="e.g. 100"/></div>
+          <div class="form-group"><label>Reference</label><input id="mv-ref" placeholder="e.g. PO-001 or REQ-045"/></div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-primary" onclick="recordMovement()">Record Movement</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">Movement History</div>
+        <table><thead><tr><th>Date/Time</th><th>Product</th><th>Type</th><th>Qty</th><th>Reference</th><th>Balance After</th></tr></thead>
+        <tbody id="movement-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SUPPLIERS -->
+    <div class="panel" id="panel-suppliers">
+      <div class="page-title">Suppliers</div>
+      <div class="page-sub">Registered vendors and suppliers</div>
+      <div class="card">
+        <table><thead><tr><th>Supplier Code</th><th>Name</th><th>Contact</th><th>Products</th><th>Lead Time</th><th>Status</th></tr></thead>
+        <tbody id="suppliers-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="panel" id="panel-reports">
+      <div class="page-title">Inventory Reports</div>
+      <div class="page-sub">Generate stock and procurement reports</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:1.5rem">
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('valuation')"><div style="font-size:22px;margin-bottom:6px">💰</div><div style="font-weight:600;margin-bottom:3px">Stock Valuation</div><div style="font-size:12px;color:var(--muted)">Total inventory value by product</div></div>
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('movement')"><div style="font-size:22px;margin-bottom:6px">↕️</div><div style="font-weight:600;margin-bottom:3px">Movement Report</div><div style="font-size:12px;color:var(--muted)">All stock in/out transactions</div></div>
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('reorder')"><div style="font-size:22px;margin-bottom:6px">🔁</div><div style="font-weight:600;margin-bottom:3px">Reorder Report</div><div style="font-size:12px;color:var(--muted)">Items needing procurement</div></div>
+        <div class="card" style="padding:14px;cursor:pointer" onclick="genReport('supplier')"><div style="font-size:22px;margin-bottom:6px">🏭</div><div style="font-weight:600;margin-bottom:3px">Supplier Summary</div><div style="font-size:12px;color:var(--muted)">Orders and spend by supplier</div></div>
+      </div>
+      <div id="report-out" style="display:none">
+        <div class="card-hdr" style="background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;padding:10px 14px;display:flex;justify-content:space-between">
+          <span style="font-weight:600" id="rpt-title"></span>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('report-out').style.display='none'">Close</button>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;color:var(--text);white-space:pre-wrap;max-height:400px;overflow-y:auto" id="rpt-content"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const SUPPLIERS=[
+  {code:'SUP-001',name:'KenPak Supplies Ltd',contact:'0722300001',leadTime:'7 days',status:'Active'},
+  {code:'SUP-002',name:'NairoPack Co.',contact:'0733400002',leadTime:'3 days',status:'Active'},
+  {code:'SUP-003',name:'East Africa Packaging',contact:'0700500003',leadTime:'14 days',status:'Active'},
+  {code:'SUP-004',name:'PackTech Kenya',contact:'0711600004',leadTime:'5 days',status:'Inactive'},
+];
+
+let products=[
+  {sku:'BOX-001',name:'Corrugated Box 30x20x15',cat:'Packaging',supplier:'SUP-001',cost:85,price:120,stock:840,reorder:200,uom:'Units',loc:'WH-A Shelf 1'},
+  {sku:'WRP-001',name:'Stretch Wrap Film 500m',cat:'Packaging',supplier:'SUP-002',cost:1200,price:1600,stock:112,reorder:150,uom:'Rolls',loc:'WH-A Shelf 2'},
+  {sku:'CTN-001',name:'HDPE Container 5L',cat:'Containers',supplier:'SUP-001',cost:320,price:450,stock:2340,reorder:500,uom:'Units',loc:'WH-B'},
+  {sku:'CTN-002',name:'PET Bottle 1L Clear',cat:'Containers',supplier:'SUP-003',cost:45,price:65,stock:0,reorder:1000,uom:'Units',loc:'WH-B'},
+  {sku:'LBL-001',name:'Thermal Label Roll 100mm',cat:'Labels',supplier:'SUP-002',cost:450,price:620,stock:67,reorder:100,uom:'Rolls',loc:'WH-A Shelf 3'},
+  {sku:'BOX-002',name:'Mailer Box 25x20x10',cat:'Packaging',supplier:'SUP-001',cost:65,price:90,stock:1200,reorder:300,uom:'Units',loc:'WH-A Shelf 1'},
+  {sku:'CSM-001',name:'Packing Tape 48mm',cat:'Consumables',supplier:'SUP-002',cost:280,price:380,stock:34,reorder:100,uom:'Rolls',loc:'WH-C'},
+  {sku:'CSM-002',name:'Bubble Wrap 1.2m Roll',cat:'Consumables',supplier:'SUP-003',cost:3200,price:4500,stock:445,reorder:80,uom:'Rolls',loc:'WH-C'},
+];
+
+let purchaseOrders=[
+  {id:'PO-001',supplier:'SUP-001',product:'BOX-001',qty:1000,price:85,total:85000,date:'2025-06-25',status:'Pending',notes:'Urgent restock'},
+  {id:'PO-002',supplier:'SUP-002',product:'LBL-001',qty:200,price:450,total:90000,date:'2025-06-28',status:'Ordered',notes:''},
+];
+let movements=[];
+let prodCounter=9,poCounter=3;
+
+function fmt(n){return Number(n).toLocaleString()}
+function getStockStatus(p){return p.stock===0?'Out of Stock':p.stock<=p.reorder?'Low Stock':'In Stock'}
+function statusBadge(s){const m={'In Stock':'green','Low Stock':'amber','Out of Stock':'red',Active:'green',Inactive:'red',Pending:'amber',Ordered:'blue',Received:'green',Cancelled:'red'};return `<span class="badge badge-${m[s]||'blue'}">${s}</span>`}
+function getSupplierName(code){const s=SUPPLIERS.find(x=>x.code===code);return s?s.name:code}
+function getProdName(sku){const p=products.find(x=>x.sku===sku);return p?p.name:sku}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function today(){return new Date().toISOString().split('T')[0]}
+function timeNow(){return new Date().toLocaleString()}
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelector(`[onclick="showPanel('${name}')"]`)?.classList.add('active');
+  if(name==='dashboard')renderDashboard();
+  if(name==='products')renderProducts();
+  if(name==='low-stock')renderLowStock();
+  if(name==='purchase-orders')renderPOs();
+  if(name==='stock-movement'){renderMovementTable();populateProductDropdowns()}
+  if(name==='suppliers')renderSuppliers();
+  if(name==='add-product')populateSupplierDropdowns();
+  if(name==='new-po'){populateSupplierDropdowns();populateProductDropdowns()}
+}
+
+function populateSupplierDropdowns(){
+  ['ap-supplier','po-supplier'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=SUPPLIERS.map(s=>`<option value="${s.code}">${s.name}</option>`).join('')})
+}
+function populateProductDropdowns(){
+  ['po-product','mv-product'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=products.map(p=>`<option value="${p.sku}">${p.name}</option>`).join('')});
+  populateCatFilter();
+}
+function populateCatFilter(){
+  const el=document.getElementById('prod-cat-filter');if(!el)return;
+  const cats=[...new Set(products.map(p=>p.cat))];
+  el.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option>${c}</option>`).join('');
+}
+
+function renderDashboard(){
+  const low=products.filter(p=>p.stock>0&&p.stock<=p.reorder);
+  const oos=products.filter(p=>p.stock===0);
+  const totalVal=products.reduce((s,p)=>s+p.stock*p.cost,0);
+  document.getElementById('d-skus').textContent=products.length;
+  document.getElementById('d-value').textContent=fmt(totalVal);
+  document.getElementById('d-low').textContent=low.length;
+  document.getElementById('d-oos').textContent=oos.length;
+  document.getElementById('d-pos').textContent=purchaseOrders.filter(po=>po.status==='Pending'||po.status==='Ordered').length;
+
+  const alerts=document.getElementById('dash-alerts');
+  const urgent=[...oos,...low].slice(0,3);
+  alerts.innerHTML=urgent.length?`<div class="alert-banner">⚠️ ${urgent.length} product${urgent.length>1?'s':''} need attention: ${urgent.map(p=>p.name).join(', ')}</div>`:'';
+
+  // Charts
+  const cats={};products.forEach(p=>{cats[p.cat]=(cats[p.cat]||0)+p.stock});
+  if(window._catChart){window._catChart.destroy()}
+  window._catChart=new Chart(document.getElementById('chart-cat'),{type:'doughnut',data:{labels:Object.keys(cats),datasets:[{data:Object.values(cats),backgroundColor:['#2563EB','#059669','#D97706','#DC2626','#0891B2','#7C3AED'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},color:'#64748B'}}}}});
+
+  const top5=[...products].sort((a,b)=>(b.stock*b.cost)-(a.stock*a.cost)).slice(0,5);
+  if(window._valChart){window._valChart.destroy()}
+  window._valChart=new Chart(document.getElementById('chart-value'),{type:'bar',data:{labels:top5.map(p=>p.sku),datasets:[{data:top5.map(p=>p.stock*p.cost),backgroundColor:'rgba(37,99,235,0.5)',borderColor:'rgba(37,99,235,0.8)',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94A3B8',font:{size:11}}},y:{ticks:{color:'#94A3B8',callback:v=>'KES '+fmt(v)}}}}});
+
+  document.getElementById('dash-movements').innerHTML=movements.slice(0,6).map(m=>`<tr><td>${m.date}</td><td>${getProdName(m.sku)}</td><td><span class="badge badge-${m.type.includes('In')||m.type.includes('Receive')||m.type==='Return'?'green':'amber'}">${m.type}</span></td><td>${m.qty}</td><td>${m.ref||'—'}</td><td>${fmt(m.balance)}</td></tr>`).join('')||`<tr><td colspan="6" style="text-align:center;color:var(--dim);padding:1.5rem">No movements yet.</td></tr>`;
+}
+
+function renderProducts(){
+  const q=(document.getElementById('prod-search')?.value||'').toLowerCase();
+  const cat=document.getElementById('prod-cat-filter')?.value||'';
+  const filtered=products.filter(p=>(!q||p.sku.toLowerCase().includes(q)||p.name.toLowerCase().includes(q))&&(!cat||p.cat===cat));
+  const pct=p=>{if(p.reorder===0)return 100;return Math.min(100,Math.round((p.stock/p.reorder)*100))};
+  document.getElementById('products-table').innerHTML=filtered.map(p=>{
+    const status=getStockStatus(p);const pc=pct(p);
+    return `<tr><td><code style="font-size:11px;color:var(--blue)">${p.sku}</code></td><td>${p.name}</td><td><span class="badge badge-blue">${p.cat}</span></td>
+      <td><div style="font-weight:600">${fmt(p.stock)}</div><div class="stock-level"><div class="stock-fill" style="width:${pc}%;background:${status==='In Stock'?'#059669':status==='Low Stock'?'#D97706':'#DC2626'}"></div></div></td>
+      <td>${fmt(p.reorder)}</td><td>KES ${fmt(p.cost)}</td><td>KES ${fmt(p.stock*p.cost)}</td><td>${statusBadge(status)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="quickAdjust('${p.sku}')">Adjust</button></td></tr>`;
+  }).join('')||`<tr><td colspan="9" style="text-align:center;color:var(--dim);padding:2rem">No products found.</td></tr>`;
+}
+
+function quickAdjust(sku){
+  const p=products.find(x=>x.sku===sku);if(!p)return;
+  const amt=prompt(`Adjust stock for "${p.name}"\nCurrent: ${p.stock}\nEnter +/- amount (e.g. +100 or -50):`);
+  if(amt===null)return;
+  const delta=parseInt(amt);if(isNaN(delta)){toast('Invalid amount');return;}
+  if(p.stock+delta<0){toast('Stock cannot go below zero');return;}
+  p.stock+=delta;
+  movements.unshift({date:timeNow(),sku:p.sku,type:'Adjustment',qty:Math.abs(delta),ref:'Manual',balance:p.stock});
+  toast(`${p.name}: stock adjusted to ${p.stock}`);renderProducts();renderDashboard();
+}
+
+function addProduct(){
+  const name=document.getElementById('ap-name').value.trim();
+  const sku=document.getElementById('ap-sku').value.trim().toUpperCase();
+  const cost=Number(document.getElementById('ap-cost').value);
+  const stock=Number(document.getElementById('ap-stock').value);
+  const reorder=Number(document.getElementById('ap-reorder').value);
+  if(!name||!sku||!cost||stock===''||!reorder){toast('Fill all required fields');return;}
+  if(products.find(p=>p.sku===sku)){toast('SKU already exists');return;}
+  products.push({sku,name,cat:document.getElementById('ap-cat').value,supplier:document.getElementById('ap-supplier').value,cost,price:Number(document.getElementById('ap-price').value)||cost,stock,reorder,uom:document.getElementById('ap-uom').value,loc:document.getElementById('ap-location').value});
+  movements.unshift({date:timeNow(),sku,type:'Stock In (Opening)',qty:stock,ref:'OPENING',balance:stock});
+  toast(`${name} added to inventory`);showPanel('products');
+}
+
+function renderLowStock(){
+  const items=products.filter(p=>p.stock<=p.reorder);
+  document.getElementById('low-stock-table').innerHTML=items.map(p=>`<tr>
+    <td><code style="font-size:11px;color:var(--blue)">${p.sku}</code></td><td>${p.name}</td>
+    <td><span style="color:${p.stock===0?'var(--red)':'var(--amber)';font-weight:600}">${fmt(p.stock)}</span></td>
+    <td>${fmt(p.reorder)}</td><td>${getSupplierName(p.supplier)}</td><td>KES ${fmt(p.cost)}</td>
+    <td><button class="btn btn-amber btn-sm" onclick="quickPO('${p.sku}')">Create PO</button></td></tr>`).join('')||`<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:2rem">✅ All stock levels are healthy.</td></tr>`;
+}
+
+function quickPO(sku){const p=products.find(x=>x.sku===sku);if(!p)return;showPanel('new-po');setTimeout(()=>{document.getElementById('po-product').value=sku;document.getElementById('po-price').value=p.cost;},100);}
+
+function renderPOs(){
+  document.getElementById('po-list').innerHTML=purchaseOrders.map(po=>`
+    <div class="po-card">
+      <div class="po-hdr"><span class="po-id">${po.id} — ${getSupplierName(po.supplier)}</span>${statusBadge(po.status)}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">${getProdName(po.product)} · Qty: ${fmt(po.qty)} · KES ${fmt(po.total)} · ETA: ${po.date}</div>
+      ${po.status==='Ordered'?`<button class="btn btn-green btn-sm" onclick="receivePO('${po.id}')">✓ Mark Received</button>`:''}
+      ${po.status==='Pending'?`<button class="btn btn-primary btn-sm" onclick="changePOStatus('${po.id}','Ordered')">→ Mark Ordered</button>`:''}
+    </div>`).join('')||'<div style="text-align:center;color:var(--dim);padding:2rem">No purchase orders.</div>';
+}
+
+function createPO(){
+  const supplier=document.getElementById('po-supplier').value;
+  const product=document.getElementById('po-product').value;
+  const qty=Number(document.getElementById('po-qty').value);
+  const price=Number(document.getElementById('po-price').value);
+  if(!qty||!price){toast('Fill required fields');return;}
+  const id=`PO-00${poCounter++}`;
+  purchaseOrders.unshift({id,supplier,product,qty,price,total:qty*price,date:document.getElementById('po-date').value||today(),status:'Pending',notes:document.getElementById('po-notes').value});
+  toast(`${id} created`);showPanel('purchase-orders');
+}
+
+function changePOStatus(id,status){const po=purchaseOrders.find(x=>x.id===id);if(po){po.status=status;renderPOs();toast(`${id} updated to ${status}`)}}
+function receivePO(id){
+  const po=purchaseOrders.find(x=>x.id===id);if(!po)return;
+  const p=products.find(x=>x.sku===po.product);if(p){p.stock+=po.qty;movements.unshift({date:timeNow(),sku:po.product,type:'Stock In (PO)',qty:po.qty,ref:po.id,balance:p.stock});}
+  po.status='Received';renderPOs();toast(`${po.id} received — stock updated`);
+}
+
+function renderMovementTable(){
+  document.getElementById('movement-table').innerHTML=movements.map(m=>`<tr><td>${m.date}</td><td>${getProdName(m.sku)}</td><td><span class="badge badge-${m.type.includes('In')||m.type==='Return'?'green':'amber'}">${m.type}</span></td><td>${fmt(m.qty)}</td><td>${m.ref||'—'}</td><td>${fmt(m.balance)}</td></tr>`).join('')||`<tr><td colspan="6" style="text-align:center;color:var(--dim);padding:2rem">No movements recorded yet.</td></tr>`;
+}
+
+function recordMovement(){
+  const sku=document.getElementById('mv-product').value;
+  const type=document.getElementById('mv-type').value;
+  const qty=Number(document.getElementById('mv-qty').value);
+  const ref=document.getElementById('mv-ref').value;
+  if(!sku||!qty){toast('Fill all required fields');return;}
+  const p=products.find(x=>x.sku===sku);if(!p)return;
+  const isOut=type.includes('Out');
+  if(isOut&&p.stock<qty){toast('Insufficient stock');return;}
+  p.stock=isOut?p.stock-qty:p.stock+qty;
+  movements.unshift({date:timeNow(),sku,type,qty,ref,balance:p.stock});
+  document.getElementById('mv-qty').value='';document.getElementById('mv-ref').value='';
+  toast(`Movement recorded — ${p.name}: ${p.stock} units`);renderMovementTable();
+}
+
+function renderSuppliers(){
+  document.getElementById('suppliers-table').innerHTML=SUPPLIERS.map(s=>`<tr><td><code style="font-size:11px;color:var(--blue)">${s.code}</code></td><td><strong>${s.name}</strong></td><td>${s.contact}</td><td>${products.filter(p=>p.supplier===s.code).length} SKUs</td><td>${s.leadTime}</td><td>${statusBadge(s.status)}</td></tr>`).join('');
+}
+
+function genReport(type){
+  const out=document.getElementById('report-out');out.style.display='block';
+  const title=document.getElementById('rpt-title');const content=document.getElementById('rpt-content');
+  const pad=(s,n)=>String(s).padEnd(n);const now=new Date().toLocaleString();
+  if(type==='valuation'){
+    const total=products.reduce((s,p)=>s+p.stock*p.cost,0);
+    title.textContent='Stock Valuation Report';
+    content.textContent=`STOCKMASTER PRO — STOCK VALUATION REPORT\nGenerated: ${now}\n${'─'.repeat(80)}\n\n${pad('SKU',12)}${pad('PRODUCT',32)}${pad('QTY',10)}${pad('UNIT COST',14)}${'STOCK VALUE'.padStart(14)}\n${'─'.repeat(80)}\n${products.map(p=>`${pad(p.sku,12)}${pad(p.name.substring(0,30),32)}${pad(fmt(p.stock),10)}${pad('KES '+fmt(p.cost),14)}${'KES '+fmt(p.stock*p.cost)}`).join('\n')}\n\n${'─'.repeat(80)}\nTOTAL INVENTORY VALUE: KES ${fmt(total)}`;
+  } else if(type==='movement'){
+    title.textContent='Stock Movement Report';
+    content.textContent=`STOCKMASTER PRO — MOVEMENT REPORT\nGenerated: ${now}\n${'─'.repeat(70)}\n\n${movements.slice(0,20).map(m=>`${m.date}\n  ${getProdName(m.sku)} · ${m.type} · Qty: ${m.qty} · Ref: ${m.ref||'—'} · Balance: ${fmt(m.balance)}`).join('\n')||'No movements recorded.'}`;
+  } else if(type==='reorder'){
+    const items=products.filter(p=>p.stock<=p.reorder);
+    title.textContent='Reorder Report';
+    content.textContent=`STOCKMASTER PRO — REORDER REPORT\nGenerated: ${now}\n${'─'.repeat(70)}\nItems requiring procurement: ${items.length}\n\n${items.map(p=>`${p.sku}  ${p.name}\n  Stock: ${fmt(p.stock)} · Reorder Pt: ${fmt(p.reorder)} · Supplier: ${getSupplierName(p.supplier)} · Lead: ${SUPPLIERS.find(s=>s.code===p.supplier)?.leadTime||'—'}`).join('\n\n')||'All stock levels healthy.'}`;
+  } else {
+    title.textContent='Supplier Summary';
+    content.textContent=`STOCKMASTER PRO — SUPPLIER SUMMARY\nGenerated: ${now}\n${'─'.repeat(70)}\n\n${SUPPLIERS.map(s=>{const ps=products.filter(p=>p.supplier===s.code);const val=ps.reduce((x,p)=>x+p.stock*p.cost,0);return `${s.code}  ${s.name}\n  Products: ${ps.length} SKUs · Total Stock Value: KES ${fmt(val)} · Lead Time: ${s.leadTime}`}).join('\n\n')}`;
+  }
+  toast('Report generated');
+}
+
+// INIT
+renderDashboard();populateCatFilter();
+document.getElementById('ap-supplier').innerHTML=SUPPLIERS.map(s=>`<option value="${s.code}">${s.name}</option>`).join('');
+document.getElementById('po-date').value=today();
+</script>
+</body>
+</html>

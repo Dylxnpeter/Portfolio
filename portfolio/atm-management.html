@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ATM Management System — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0A0A0A;--surface:#111;--surface2:#1A1A1A;--border:#2A2A2A;--green:#00FF88;--green-dim:rgba(0,255,136,0.08);--amber:#FFB800;--red:#FF4444;--text:#E0E0E0;--muted:#888;--dim:#444;--radius:8px}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;min-height:100vh;display:flex;flex-direction:column}
+
+.topbar{background:#0D0D0D;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:48px;flex-shrink:0}
+.topbar-logo{color:var(--green);font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.demo-badge{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);padding:2px 8px;border-radius:4px;font-size:10px;color:var(--green)}
+.back-link{color:var(--muted);text-decoration:none;font-size:12px}
+.back-link:hover{color:var(--green)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+
+.app{display:flex;flex:1;overflow:hidden}
+
+/* ATM MACHINE */
+.atm-wrap{width:340px;flex-shrink:0;background:#1A1A1A;border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:2rem 1.5rem;gap:1.5rem}
+.atm-screen{width:100%;background:#001A00;border:3px solid #1A3A1A;border-radius:var(--radius);padding:1.5rem;min-height:280px;display:flex;flex-direction:column}
+.atm-header{text-align:center;color:var(--green);font-size:11px;letter-spacing:0.12em;margin-bottom:1rem;border-bottom:1px solid #1A3A1A;padding-bottom:0.75rem}
+.atm-content{flex:1;display:flex;flex-direction:column;gap:0.5rem}
+.atm-line{font-size:12px;line-height:1.8}
+.atm-line.green{color:var(--green)}
+.atm-line.amber{color:var(--amber)}
+.atm-line.red{color:var(--red)}
+.atm-line.dim{color:var(--dim)}
+.atm-line.center{text-align:center}
+.atm-line.big{font-size:22px;font-weight:600;color:var(--green);text-align:center;margin:0.5rem 0}
+.atm-input-row{margin-top:auto;padding-top:0.75rem;border-top:1px solid #1A3A1A}
+.atm-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--green);color:var(--green);font-family:'JetBrains Mono',monospace;font-size:13px;padding:4px 0;outline:none;caret-color:var(--green)}
+.atm-input::placeholder{color:#1A4A1A}
+
+/* KEYPAD */
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.key{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--text);transition:all 0.1s;user-select:none}
+.key:hover{background:#222;border-color:#444}
+.key:active{background:#2A2A2A;transform:scale(0.96)}
+.key.green{color:var(--green);border-color:rgba(0,255,136,0.3)}
+.key.red{color:var(--red);border-color:rgba(255,68,68,0.3)}
+.key.amber{color:var(--amber);border-color:rgba(255,184,0,0.3)}
+
+/* ADMIN PANEL */
+.admin-panel{flex:1;overflow-y:auto;padding:1.5rem;background:var(--bg)}
+.admin-title{font-size:16px;font-weight:600;color:var(--green);margin-bottom:1.25rem;display:flex;align-items:center;gap:8px}
+.admin-tabs{display:flex;gap:0;margin-bottom:1.25rem;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.admin-tab{padding:8px 16px;cursor:pointer;font-size:12px;color:var(--muted);background:var(--surface);transition:all 0.15s;border-right:1px solid var(--border);flex:1;text-align:center}
+.admin-tab:last-child{border-right:none}
+.admin-tab.active,.admin-tab:hover{background:var(--green-dim);color:var(--green)}
+.admin-content{display:none}.admin-content.active{display:block}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1rem}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--green)}
+
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:0.08em;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:8px 12px;border-bottom:1px solid #1A1A1A;font-size:12px;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#111}
+
+.badge{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600}
+.badge-green{background:rgba(0,255,136,0.1);color:var(--green)}
+.badge-red{background:rgba(255,68,68,0.1);color:var(--red)}
+.badge-amber{background:rgba(255,184,0,0.1);color:var(--amber)}
+
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px}
+.stat-l{font-size:10px;color:var(--dim);margin-bottom:4px}
+.stat-v{font-size:18px;font-weight:600;color:var(--green)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">🏧 ATM Management System<span class="demo-badge">DEMO</span></div>
+  <div class="topbar-right"><a href="../index.html" class="back-link">← Portfolio</a></div>
+</div>
+
+<div class="app">
+  <!-- ATM TERMINAL -->
+  <div class="atm-wrap">
+    <div style="font-size:11px;color:var(--dim);text-align:center;letter-spacing:0.1em">INTERACTIVE ATM TERMINAL</div>
+    <div class="atm-screen">
+      <div class="atm-header">◆ DEMO BANK ATM ◆<br><span style="font-size:9px;color:#1A6A1A">SECURE SESSION</span></div>
+      <div class="atm-content" id="atm-screen"></div>
+      <div class="atm-input-row" id="atm-input-wrap" style="display:none">
+        <div style="font-size:10px;color:var(--dim);margin-bottom:4px" id="atm-input-label">ENTER VALUE:</div>
+        <input class="atm-input" id="atm-input" autocomplete="off"/>
+      </div>
+    </div>
+    <div class="keypad" id="keypad"></div>
+    <div style="font-size:10px;color:var(--dim);text-align:center">Use keypad or keyboard to interact</div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="admin-panel">
+    <div class="admin-title">⚙ Admin Dashboard</div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-l">TOTAL ACCOUNTS</div><div class="stat-v" id="a-accounts">0</div></div>
+      <div class="stat"><div class="stat-l">ACTIVE CARDS</div><div class="stat-v" id="a-cards">0</div></div>
+      <div class="stat"><div class="stat-l">TOTAL DEPOSITS (KES)</div><div class="stat-v" id="a-deposits">0</div></div>
+      <div class="stat"><div class="stat-l">TRANSACTIONS TODAY</div><div class="stat-v" id="a-tx">0</div></div>
+    </div>
+    <div class="admin-tabs">
+      <div class="admin-tab active" onclick="adminTab('accounts')">Accounts</div>
+      <div class="admin-tab" onclick="adminTab('transactions')">Transaction Log</div>
+      <div class="admin-tab" onclick="adminTab('atm-status')">ATM Status</div>
+    </div>
+    <div class="admin-content active" id="tab-accounts">
+      <div class="card">
+        <div class="card-hdr">All Accounts</div>
+        <table><thead><tr><th>Account No.</th><th>Name</th><th>Card No.</th><th>Balance (KES)</th><th>Type</th><th>Status</th></tr></thead>
+        <tbody id="accounts-table"></tbody></table>
+      </div>
+    </div>
+    <div class="admin-content" id="tab-transactions">
+      <div class="card">
+        <div class="card-hdr">Transaction Log (Live)</div>
+        <table><thead><tr><th>Time</th><th>Account</th><th>Type</th><th>Amount (KES)</th><th>Balance After</th><th>Status</th></tr></thead>
+        <tbody id="tx-log"></tbody></table>
+      </div>
+    </div>
+    <div class="admin-content" id="tab-atm-status">
+      <div class="card" style="padding:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px">
+          <div><div style="color:var(--dim);font-size:10px;margin-bottom:4px">ATM ID</div>ATM-NBI-001</div>
+          <div><div style="color:var(--dim);font-size:10px;margin-bottom:4px">Location</div>Westlands Branch</div>
+          <div><div style="color:var(--dim);font-size:10px;margin-bottom:4px">Cash Level</div><span style="color:var(--green)">KES 2,450,000</span></div>
+          <div><div style="color:var(--dim);font-size:10px;margin-bottom:4px">Network</div><span class="badge badge-green">ONLINE</span></div>
+          <div><div style="color:var(--dim);font-size:10px;margin-bottom:4px">Receipt Paper</div><span style="color:var(--amber)">LOW (12%)</span></div>
+          <div><div style="color:var(--dim);font-size:10px;margin-bottom:4px">Last Serviced</div>2025-06-01</div>
+          <div><div style="color:var(--dim);font-size:10px;margin-bottom:4px">Uptime</div>99.8%</div>
+          <div><div style="color:var(--dim);font-size:10px;margin-bottom:4px">Software Ver.</div>v3.4.1</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ACCOUNTS ──
+const ACCOUNTS = {
+  '1234567890': {name:'James Mwangi',card:'4111 2222 3333 0001',pin:'1234',balance:85000,type:'Savings',status:'Active',locked:false,attempts:0},
+  '9876543210': {name:'Fatuma Hassan',card:'4111 2222 3333 0002',pin:'5678',balance:142500,type:'Current',status:'Active',locked:false,attempts:0},
+  '5555444433': {name:'David Otieno',card:'4111 2222 3333 0003',pin:'9012',balance:23000,type:'Savings',status:'Active',locked:false,attempts:0},
+  '1111222233': {name:'Winnie Kamau',card:'4111 2222 3333 0004',pin:'3456',balance:310000,type:'Current',status:'Active',locked:false,attempts:0},
+};
+
+let txLog = [];
+let session = {state:'welcome',account:null,pinBuffer:''};
+
+// ── STATE MACHINE ──
+const screens = {
+  welcome: {
+    lines:[
+      {t:'center green',v:'WELCOME'},
+      {t:'center dim',v:'Please insert your card'},
+      {t:''},
+      {t:'center',v:'Demo accounts:'},
+      {t:'amber',v:' Card: 4111 2222 3333 0001'},
+      {t:'dim',v:' PIN: 1234  (James Mwangi)'},
+      {t:'amber',v:' Card: 4111 2222 3333 0002'},
+      {t:'dim',v:' PIN: 5678  (Fatuma Hassan)'},
+    ],
+    keys:[{l:'ENTER CARD',a:'enter-card',cls:'green'}],
+    input:false,
+  },
+  'enter-card': {
+    lines:[{t:'green',v:'INSERT CARD'},{t:''},{t:'dim',v:'Enter card number:'}],
+    keys:[{l:'CANCEL',a:'welcome',cls:'red'}],
+    input:true,inputLabel:'CARD NUMBER (last 4 digits or full):',inputAction:'verify-card',
+  },
+  'enter-pin': {
+    lines:[{t:'green',v:'ENTER PIN'},{t:''},{t:'dim',v:'Enter your 4-digit PIN'}],
+    keys:[
+      {l:'1',a:'pin-1'},{l:'2',a:'pin-2'},{l:'3',a:'pin-3'},
+      {l:'4',a:'pin-4'},{l:'5',a:'pin-5'},{l:'6',a:'pin-6'},
+      {l:'7',a:'pin-7'},{l:'8',a:'pin-8'},{l:'9',a:'pin-9'},
+      {l:'CLR',a:'pin-clr',cls:'amber'},{l:'0',a:'pin-0'},{l:'OK',a:'pin-ok',cls:'green'},
+    ],
+    input:false,
+  },
+  menu: {
+    lines:[],
+    keys:[
+      {l:'BALANCE',a:'balance',cls:'green'},{l:'WITHDRAW',a:'withdraw-menu',cls:'green'},{l:'DEPOSIT',a:'deposit-menu',cls:'green'},
+      {l:'TRANSFER',a:'transfer-menu',cls:'amber'},{l:'MINI STMT',a:'mini-stmt',cls:'amber'},{l:'CHANGE PIN',a:'change-pin',cls:'amber'},
+      {l:'','a':''},{l:'','a':''},{l:'EXIT',a:'welcome',cls:'red'},
+    ],
+    input:false,
+  },
+};
+
+function fmt(n){return Number(n).toLocaleString()}
+function getAccountByCard(card){
+  const clean=card.replace(/\s/g,'');
+  return Object.entries(ACCOUNTS).find(([,a])=>a.card.replace(/\s/g,'')===clean||a.card.replace(/\s/g,'').endsWith(clean))||null;
+}
+function time(){return new Date().toLocaleTimeString()}
+
+function setScreen(name, extraLines=[]){
+  const s=screens[name];
+  const scr=document.getElementById('atm-screen');
+  let html='';
+  const lines=[...(s?s.lines:[]),...extraLines];
+  lines.forEach(l=>{
+    if(typeof l==='string'){html+=`<div class="atm-line dim">&nbsp;</div>`;return;}
+    if(l.t===''){html+=`<div class="atm-line">&nbsp;</div>`;return;}
+    const classes=l.t.split(' ').map(c=>`${c}`).join(' ');
+    html+=`<div class="atm-line ${classes}">${l.v}</div>`;
+  });
+  scr.innerHTML=html;
+
+  const kp=document.getElementById('keypad');
+  const iw=document.getElementById('atm-input-wrap');
+  const inp=document.getElementById('atm-input');
+  if(!s){kp.innerHTML='';iw.style.display='none';return;}
+
+  // Keypad
+  kp.innerHTML=s.keys.map(k=>k.l?`<div class="key ${k.cls||''}" onclick="keyAction('${k.a}')">${k.l}</div>`:`<div class="key" style="opacity:0;pointer-events:none"></div>`).join('');
+
+  // Input
+  if(s.input){
+    iw.style.display='block';
+    document.getElementById('atm-input-label').textContent=s.inputLabel||'ENTER:';
+    inp.value='';inp.type=name==='enter-pin'?'password':'text';
+    setTimeout(()=>inp.focus(),100);
+    inp.onkeydown=e=>{if(e.key==='Enter')keyAction(s.inputAction)};
+  } else {iw.style.display='none';}
+}
+
+function keyAction(action){
+  const inp=document.getElementById('atm-input');
+  if(action.startsWith('pin-')){
+    const sub=action.replace('pin-','');
+    if(sub==='clr'){session.pinBuffer='';updatePinDisplay();return;}
+    if(sub==='ok'){verifyPin();return;}
+    if(session.pinBuffer.length<4){session.pinBuffer+=sub;updatePinDisplay();}
+    return;
+  }
+  if(action==='welcome'){session={state:'welcome',account:null,pinBuffer:''};setScreen('welcome');return;}
+  if(action==='enter-card'){session.state='enter-card';setScreen('enter-card');return;}
+  if(action==='verify-card'){
+    const val=inp.value.trim();
+    const found=getAccountByCard(val);
+    if(!found){setScreen('enter-card',[{t:'red',v:'Card not recognised. Try again.'}]);return;}
+    const [accNo,acc]=found;
+    if(acc.locked){setScreen('welcome',[{t:'red center',v:'CARD BLOCKED'},{t:'dim center',v:'Please visit a branch.'}]);return;}
+    session.account=accNo;session.pinBuffer='';
+    session.state='enter-pin';setScreen('enter-pin',[{t:'green',v:`Welcome, ${acc.name.split(' ')[0]}`}]);
+    return;
+  }
+  if(action==='balance'){showBalance();return;}
+  if(action==='withdraw-menu'){showWithdrawMenu();return;}
+  if(action==='deposit-menu'){showDepositMenu();return;}
+  if(action==='transfer-menu'){showTransferMenu();return;}
+  if(action==='mini-stmt'){showMiniStatement();return;}
+  if(action==='change-pin'){showChangePin();return;}
+  if(action.startsWith('withdraw-')){
+    const amt=Number(action.replace('withdraw-',''));
+    doWithdraw(amt);return;
+  }
+  if(action==='withdraw-custom'){
+    const amt=Number(inp.value);
+    if(!amt||amt<100){showMsg('red','Invalid amount. Minimum KES 100.');return;}
+    doWithdraw(amt);return;
+  }
+  if(action==='deposit-confirm'){
+    const amt=Number(inp.value);
+    if(!amt||amt<100){showMsg('red','Invalid amount.');return;}
+    doDeposit(amt);return;
+  }
+  if(action==='transfer-confirm'){
+    const parts=inp.value.split(',');
+    if(parts.length<2){showMsg('red','Enter: ACCOUNT,AMOUNT');return;}
+    doTransfer(parts[0].trim(),Number(parts[1].trim()));return;
+  }
+  if(action==='pin-confirm'){
+    const newPin=inp.value.trim();
+    if(!/^\d{4}$/.test(newPin)){showMsg('red','PIN must be 4 digits.');return;}
+    ACCOUNTS[session.account].pin=newPin;
+    showMsg('green','PIN changed successfully!');return;
+  }
+}
+
+function updatePinDisplay(){
+  const scr=document.getElementById('atm-screen');
+  const pinLine=scr.querySelector('.pin-display');
+  const dots='● '.repeat(session.pinBuffer.length)+'○ '.repeat(4-session.pinBuffer.length);
+  if(pinLine){pinLine.textContent=dots;}
+  else{const d=document.createElement('div');d.className='atm-line green center pin-display';d.textContent=dots;scr.appendChild(d);}
+}
+
+function verifyPin(){
+  const acc=ACCOUNTS[session.account];
+  if(session.pinBuffer===acc.pin){
+    acc.attempts=0;session.state='menu';
+    screens.menu.lines=[{t:'green center',v:`MAIN MENU`},{t:'dim center',v:acc.name}];
+    setScreen('menu');
+  } else {
+    acc.attempts=(acc.attempts||0)+1;
+    if(acc.attempts>=3){acc.locked=true;acc.status='Blocked';session={state:'welcome',account:null,pinBuffer:''};setScreen('welcome',[{t:'red center',v:'CARD BLOCKED — 3 failed attempts'},{t:'dim center',v:'Visit branch to unlock.'}]);renderAdmin();}
+    else{session.pinBuffer='';setScreen('enter-pin',[{t:'red',v:`Incorrect PIN. ${3-acc.attempts} attempts left.`}]);}
+  }
+}
+
+function showBalance(){
+  const acc=ACCOUNTS[session.account];
+  logTx(session.account,'Balance Enquiry',0,acc.balance);
+  const scr=document.getElementById('atm-screen');
+  scr.innerHTML=`<div class="atm-line green center">ACCOUNT BALANCE</div>
+    <div class="atm-line">&nbsp;</div>
+    <div class="atm-line dim">Account: ${session.account}</div>
+    <div class="atm-line dim">Name: ${acc.name}</div>
+    <div class="atm-line dim">Type: ${acc.type}</div>
+    <div class="atm-line">&nbsp;</div>
+    <div class="atm-line dim">Available Balance:</div>
+    <div class="atm-line big">KES ${fmt(acc.balance)}</div>`;
+  document.getElementById('keypad').innerHTML=`<div class="key red" onclick="setScreen('menu')">BACK</div><div class="key" style="opacity:0"></div><div class="key" style="opacity:0"></div>`;
+  document.getElementById('atm-input-wrap').style.display='none';
+}
+
+function showWithdrawMenu(){
+  const scr=document.getElementById('atm-screen');
+  scr.innerHTML=`<div class="atm-line green center">WITHDRAW CASH</div>
+    <div class="atm-line">&nbsp;</div>
+    <div class="atm-line dim">Select amount or enter custom:</div>`;
+  document.getElementById('atm-input-wrap').style.display='block';
+  document.getElementById('atm-input-label').textContent='CUSTOM AMOUNT (KES):';
+  document.getElementById('atm-input').value='';
+  document.getElementById('atm-input').type='number';
+  document.getElementById('atm-input').onkeydown=e=>{if(e.key==='Enter')keyAction('withdraw-custom')};
+  document.getElementById('keypad').innerHTML=
+    ['1000','2000','5000','10000','20000','50000'].map(a=>`<div class="key green" onclick="keyAction('withdraw-${a}')">${fmt(a)}</div>`).join('')+
+    `<div class="key amber" onclick="keyAction('withdraw-custom')">CUSTOM</div><div class="key" style="opacity:0"></div><div class="key red" onclick="setScreen('menu')">BACK</div>`;
+}
+
+function doWithdraw(amt){
+  const acc=ACCOUNTS[session.account];
+  if(amt>acc.balance){showMsg('red',`Insufficient funds.\nBalance: KES ${fmt(acc.balance)}`);return;}
+  if(amt%100!==0){showMsg('red','Amount must be a multiple of 100.');return;}
+  acc.balance-=amt;logTx(session.account,'Withdrawal',amt,acc.balance);
+  const scr=document.getElementById('atm-screen');
+  scr.innerHTML=`<div class="atm-line green center">PLEASE COLLECT CASH</div>
+    <div class="atm-line">&nbsp;</div>
+    <div class="atm-line dim">Amount dispensed:</div>
+    <div class="atm-line big">KES ${fmt(amt)}</div>
+    <div class="atm-line">&nbsp;</div>
+    <div class="atm-line dim">New balance: KES ${fmt(acc.balance)}</div>
+    <div class="atm-line green">✓ Transaction complete</div>`;
+  document.getElementById('keypad').innerHTML=`<div class="key green" onclick="setScreen('menu')">MENU</div><div class="key" style="opacity:0"></div><div class="key red" onclick="keyAction('welcome')">EXIT</div>`;
+  document.getElementById('atm-input-wrap').style.display='none';
+  renderAdmin();
+}
+
+function showDepositMenu(){
+  document.getElementById('atm-screen').innerHTML=`<div class="atm-line green center">DEPOSIT CASH</div><div class="atm-line">&nbsp;</div><div class="atm-line dim">Enter amount to deposit:</div>`;
+  document.getElementById('atm-input-wrap').style.display='block';
+  document.getElementById('atm-input-label').textContent='DEPOSIT AMOUNT (KES):';
+  document.getElementById('atm-input').value='';document.getElementById('atm-input').type='number';
+  document.getElementById('atm-input').onkeydown=e=>{if(e.key==='Enter')keyAction('deposit-confirm')};
+  document.getElementById('keypad').innerHTML=`<div class="key green" onclick="keyAction('deposit-confirm')">CONFIRM</div><div class="key" style="opacity:0"></div><div class="key red" onclick="setScreen('menu')">BACK</div>`;
+}
+
+function doDeposit(amt){
+  const acc=ACCOUNTS[session.account];
+  acc.balance+=amt;logTx(session.account,'Deposit',amt,acc.balance);
+  document.getElementById('atm-screen').innerHTML=`<div class="atm-line green center">DEPOSIT SUCCESSFUL</div><div class="atm-line">&nbsp;</div><div class="atm-line dim">Amount deposited: KES ${fmt(amt)}</div><div class="atm-line big">KES ${fmt(acc.balance)}</div><div class="atm-line green">✓ Transaction complete</div>`;
+  document.getElementById('keypad').innerHTML=`<div class="key green" onclick="setScreen('menu')">MENU</div><div class="key" style="opacity:0"></div><div class="key red" onclick="keyAction('welcome')">EXIT</div>`;
+  document.getElementById('atm-input-wrap').style.display='none';renderAdmin();
+}
+
+function showTransferMenu(){
+  document.getElementById('atm-screen').innerHTML=`<div class="atm-line green center">FUND TRANSFER</div><div class="atm-line">&nbsp;</div><div class="atm-line dim">Enter destination account</div><div class="atm-line dim">and amount, comma separated.</div><div class="atm-line amber">e.g. 9876543210, 5000</div>`;
+  document.getElementById('atm-input-wrap').style.display='block';
+  document.getElementById('atm-input-label').textContent='ACCOUNT, AMOUNT:';
+  document.getElementById('atm-input').value='';document.getElementById('atm-input').type='text';
+  document.getElementById('atm-input').onkeydown=e=>{if(e.key==='Enter')keyAction('transfer-confirm')};
+  document.getElementById('keypad').innerHTML=`<div class="key green" onclick="keyAction('transfer-confirm')">SEND</div><div class="key" style="opacity:0"></div><div class="key red" onclick="setScreen('menu')">BACK</div>`;
+}
+
+function doTransfer(destAcc,amt){
+  const src=ACCOUNTS[session.account];const dst=ACCOUNTS[destAcc];
+  if(!dst){showMsg('red','Destination account not found.');return;}
+  if(destAcc===session.account){showMsg('red','Cannot transfer to same account.');return;}
+  if(amt>src.balance){showMsg('red',`Insufficient funds.`);return;}
+  src.balance-=amt;dst.balance+=amt;
+  logTx(session.account,`Transfer → ${destAcc}`,amt,src.balance);
+  logTx(destAcc,`Transfer ← ${session.account}`,amt,dst.balance);
+  document.getElementById('atm-screen').innerHTML=`<div class="atm-line green center">TRANSFER SUCCESSFUL</div><div class="atm-line">&nbsp;</div><div class="atm-line dim">To: ${dst.name}</div><div class="atm-line dim">Amount: KES ${fmt(amt)}</div><div class="atm-line dim">New balance: KES ${fmt(src.balance)}</div><div class="atm-line green">✓ Transaction complete</div>`;
+  document.getElementById('keypad').innerHTML=`<div class="key green" onclick="setScreen('menu')">MENU</div><div class="key" style="opacity:0"></div><div class="key red" onclick="keyAction('welcome')">EXIT</div>`;
+  document.getElementById('atm-input-wrap').style.display='none';renderAdmin();
+}
+
+function showMiniStatement(){
+  const myTx=txLog.filter(t=>t.acc===session.account).slice(-5);
+  const acc=ACCOUNTS[session.account];
+  let html=`<div class="atm-line green center">MINI STATEMENT</div><div class="atm-line dim">${acc.name}</div><div class="atm-line">&nbsp;</div>`;
+  if(!myTx.length){html+=`<div class="atm-line dim">No transactions yet.</div>`;}
+  else myTx.reverse().forEach(t=>{html+=`<div class="atm-line dim" style="font-size:10px">${t.time} ${t.type}</div><div class="atm-line ${t.type.includes('Withdraw')||t.type.includes('Transfer →')?'red':'green'}" style="font-size:11px">&nbsp;KES ${fmt(t.amt)}</div>`;});
+  html+=`<div class="atm-line">&nbsp;</div><div class="atm-line dim">Balance: KES ${fmt(acc.balance)}</div>`;
+  document.getElementById('atm-screen').innerHTML=html;
+  document.getElementById('keypad').innerHTML=`<div class="key green" onclick="setScreen('menu')">BACK</div><div class="key" style="opacity:0"></div><div class="key" style="opacity:0"></div>`;
+  document.getElementById('atm-input-wrap').style.display='none';
+}
+
+function showChangePin(){
+  document.getElementById('atm-screen').innerHTML=`<div class="atm-line green center">CHANGE PIN</div><div class="atm-line">&nbsp;</div><div class="atm-line dim">Enter your new 4-digit PIN:</div>`;
+  document.getElementById('atm-input-wrap').style.display='block';
+  document.getElementById('atm-input-label').textContent='NEW PIN (4 digits):';
+  document.getElementById('atm-input').value='';document.getElementById('atm-input').type='password';
+  document.getElementById('atm-input').onkeydown=e=>{if(e.key==='Enter')keyAction('pin-confirm')};
+  document.getElementById('keypad').innerHTML=`<div class="key green" onclick="keyAction('pin-confirm')">CONFIRM</div><div class="key" style="opacity:0"></div><div class="key red" onclick="setScreen('menu')">BACK</div>`;
+}
+
+function showMsg(cls,msg){
+  const scr=document.getElementById('atm-screen');
+  const lines=msg.split('\n').map(l=>`<div class="atm-line ${cls} center">${l}</div>`).join('');
+  scr.innerHTML=`${lines}<div class="atm-line">&nbsp;</div>`;
+  document.getElementById('keypad').innerHTML=`<div class="key green" onclick="setScreen('menu')">MENU</div><div class="key" style="opacity:0"></div><div class="key red" onclick="keyAction('welcome')">EXIT</div>`;
+  document.getElementById('atm-input-wrap').style.display='none';
+}
+
+function logTx(acc,type,amt,bal){
+  txLog.unshift({acc,type,amt,bal,time:time()});
+  renderTxLog();
+}
+
+// ── ADMIN ──
+function adminTab(name){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.admin-content').forEach(c=>c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function renderAdmin(){
+  const accs=Object.entries(ACCOUNTS);
+  document.getElementById('a-accounts').textContent=accs.length;
+  document.getElementById('a-cards').textContent=accs.filter(([,a])=>!a.locked).length;
+  document.getElementById('a-deposits').textContent=fmt(accs.reduce((s,[,a])=>s+a.balance,0));
+  document.getElementById('a-tx').textContent=txLog.length;
+  document.getElementById('accounts-table').innerHTML=accs.map(([no,a])=>`<tr><td><code style="font-size:11px">${no}</code></td><td>${a.name}</td><td><code style="font-size:10px">${a.card}</code></td><td>KES ${fmt(a.balance)}</td><td>${a.type}</td><td><span class="badge badge-${a.locked?'red':a.status==='Active'?'green':'amber'}">${a.locked?'BLOCKED':a.status}</span></td></tr>`).join('');
+  renderTxLog();
+}
+
+function renderTxLog(){
+  document.getElementById('tx-log').innerHTML=txLog.length?txLog.map(t=>`<tr><td>${t.time}</td><td><code style="font-size:11px">${t.acc}</code></td><td>${t.type}</td><td>KES ${fmt(t.amt)}</td><td>KES ${fmt(t.bal)}</td><td><span class="badge badge-green">OK</span></td></tr>`).join(''):
+    `<tr><td colspan="6" style="text-align:center;color:var(--dim);padding:2rem">No transactions yet. Use the ATM terminal.</td></tr>`;
+}
+
+// ── INIT ──
+setScreen('welcome');
+renderAdmin();
+</script>
+</body>
+</html>

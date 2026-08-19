@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dylan Njang'iru — Project Demos</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060810;--surface:#0F1629;--border:rgba(124,58,237,0.15);--purple:#7C3AED;--purple-light:#A78BFA;--purple-dim:rgba(124,58,237,0.12);--cyan:#38BDF8;--cyan-dim:rgba(56,189,248,0.1);--text:#E2E8F0;--muted:#94A3B8;--dim:#475569}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,58,237,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+.topbar{background:rgba(6,8,16,0.9);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:58px;position:sticky;top:0;z-index:100;backdrop-filter:blur(16px)}
+.topbar-logo{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--purple-light);display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--purple);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.back-link{color:var(--muted);text-decoration:none;font-size:13px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px;transition:color 0.2s}
+.back-link:hover{color:var(--cyan)}
+.hero{max-width:900px;margin:0 auto;padding:4rem 2rem 2rem;text-align:center;position:relative;z-index:1}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--purple-light);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1rem}
+h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:#fff;line-height:1.1;letter-spacing:-0.02em;margin-bottom:1rem}
+h1 em{font-style:normal;background:linear-gradient(135deg,var(--purple-light),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.subtitle{font-size:15px;color:var(--muted);line-height:1.8;max-width:560px;margin:0 auto 2.5rem}
+.grid{max-width:1000px;margin:0 auto;padding:0 2rem 4rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;position:relative;z-index:1}
+.demo-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:12px;transition:all 0.2s;position:relative;overflow:hidden}
+.demo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;opacity:0;transition:opacity 0.2s}
+.demo-card:hover{transform:translateY(-4px);border-color:rgba(124,58,237,0.35);box-shadow:0 12px 40px rgba(0,0,0,0.4)}
+.demo-card:hover::before{opacity:1}
+.card-icon{font-size:2.2rem;margin-bottom:4px}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:#fff;line-height:1.3}
+.card-desc{font-size:13px;color:var(--muted);line-height:1.7;flex:1}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
+.card-cta{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);margin-top:auto}
+.cta-link{font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:500;display:flex;align-items:center;gap:5px;transition:gap 0.2s}
+.demo-card:hover .cta-link{gap:10px}
+.demo-type{font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:0.06em;text-transform:uppercase}
+
+/* accent colours */
+.acc-purple::before{background:linear-gradient(90deg,#7C3AED,#A78BFA)}.acc-purple .cta-link{color:var(--purple-light)}.acc-purple .card-icon-bg{background:rgba(124,58,237,0.12)}
+.acc-cyan::before{background:linear-gradient(90deg,#0EA5E9,#38BDF8)}.acc-cyan .cta-link{color:var(--cyan)}.acc-cyan .card-icon-bg{background:rgba(56,189,248,0.1)}
+.acc-green::before{background:linear-gradient(90deg,#059669,#10B981)}.acc-green .cta-link{color:#34D399}
+.acc-amber::before{background:linear-gradient(90deg,#D97706,#F59E0B)}.acc-amber .cta-link{color:#FCD34D}
+.acc-coral::before{background:linear-gradient(90deg,#E11D48,#F43F5E)}.acc-coral .cta-link{color:#FB7185}
+.acc-indigo::before{background:linear-gradient(90deg,#4F46E5,#818CF8)}.acc-indigo .cta-link{color:#A5B4FC}
+.acc-teal::before{background:linear-gradient(90deg,#0E7490,#06B6D4)}.acc-teal .cta-link{color:#67E8F9}
+.acc-brown::before{background:linear-gradient(90deg,#92400E,#B45309)}.acc-brown .cta-link{color:#FDE68A}
+.acc-orange::before{background:linear-gradient(90deg,#EA580C,#F97316)}.acc-orange .cta-link{color:#FDBA74}
+
+.type-full{background:rgba(16,185,129,0.1);color:#34D399}
+.type-read{background:rgba(245,158,11,0.1);color:#FCD34D}
+
+footer{text-align:center;padding:2rem;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);position:relative;z-index:1;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo"><span class="dot"></span>dylan.demos</div>
+  <a href="../index.html" class="back-link">← Back to Portfolio</a>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">interactive project demos</div>
+  <h1>All projects, <em>in action</em> —<br>no installation required.</h1>
+  <p class="subtitle">Every demo runs entirely in your browser with realistic seeded data. No backend, no login, no setup — just click and explore.</p>
+</div>
+
+<div class="grid">
+
+  <a href="amiable-insurance.html" class="demo-card acc-purple">
+    <div class="card-icon">🛡️</div>
+    <div class="card-title">Amiable Insurance System</div>
+    <div class="card-desc">Full insurance management platform — member registration, claims processing, receipting, underwriter reports, and agent management. Seeded with fictional data.</div>
+    <div class="card-tags">
+      <span class="tag" style="background:rgba(124,58,237,0.12);color:#A78BFA">Java</span>
+      <span class="tag" style="background:rgba(124,58,237,0.12);color:#A78BFA">Insurance</span>
+      <span class="tag" style="background:rgba(124,58,237,0.12);color:#A78BFA">Reports</span>
+    </div>
+    <div class="card-cta">
+      <span class="demo-type type-full">Full Demo</span>
+      <span class="cta-link">Open demo →</span>
+    </div>
+  </a>
+
+  <a href="xpert-analytics.html" class="demo-card acc-cyan">
+    <div class="card-icon">📊</div>
+    <div class="card-title">Xpert Analytics Platform</div>
+    <div class="card-desc">5-layer secure analytics platform — live ETL pipeline simulation, PII anonymisation firewall, warehouse dashboards with Chart.js, and report generation.</div>
+    <div class="card-tags">
+      <span class="tag" style="background:rgba(56,189,248,0.1);color:#38BDF8">FastAPI</span>
+      <span class="tag" style="background:rgba(56,189,248,0.1);color:#38BDF8">ETL</span>
+      <span class="tag" style="background:rgba(56,189,248,0.1);color:#38BDF8">PII Masking</span>
+    </div>
+    <div class="card-cta">
+      <span class="demo-type type-full">Full Demo</span>
+      <span class="cta-link">Open demo →</span>
+    </div>
+  </a>
+
+  <a href="atm-management.html" class="demo-card acc-green">
+    <div class="card-icon">🏧</div>
+    <div class="card-title">ATM Management System</div>
+    <div class="card-desc">Interactive ATM terminal with keypad — deposit, withdraw, transfer, balance enquiry, PIN change, and mini statement. Admin dashboard shows live transaction log.</div>
+    <div class="card-tags">
+      <span class="tag" style="background:rgba(16,185,129,0.1);color:#10B981">Java</span>
+      <span class="tag" style="background:rgba(16,185,129,0.1);color:#10B981">Banking</span>
+      <span class="tag" style="background:rgba(16,185,129,0.1);color:#10B981">OOP</span>
+    </div>
+    <div class="card-cta">
+      <span class="demo-type type-full">Full Demo</span>
+      <span class="cta-link">Open demo →</span>
+    </div>
+  </a>
+
+  <a href="evoting.html" class="demo-card acc-indigo">
+    <div class="card-icon">🗳️</div>
+    <div class="card-title">Electronic Voting Management System</div>
+    <div class="card-desc">Secure voting platform — voter registration, candidate management, encrypted ballot casting, live results with progress bars, and an immutable audit trail.</div>
+    <div class="card-tags">
+      <span class="tag" style="background:rgba(99,102,241,0.1);color:#818CF8">Java</span>
+      <span class="tag" style="background:rgba(99,102,241,0.1);color:#818CF8">Security</span>
+      <span class="tag" style="background:rgba(99,102,241,0.1);color:#818CF8">Audit Trail</span>
+    </div>
+    <div class="card-cta">
+      <span class="demo-type type-full">Full Demo</span>
+      <span class="cta-link">Open demo →</span>
+    </div>
+  </a>
+
+  <a href="stockmaster.html" class="demo-card acc-amber">
+    <div class="card-icon">📦</div>
+    <div class="card-title">StockMaster Pro</div>
+    <div class="card-desc">Inventory management with live charts — add products, record stock movements, create purchase orders, receive deliveries, and generate valuation reports.</div>
+    <div class="card-tags">
+      <span class="tag" style="background:rgba(245,158,11,0.1);color:#F59E0B">Java</span>
+      <span class="tag" style="background:rgba(245,158,11,0.1);color:#F59E0B">MySQL</span>
+      <span class="tag" style="background:rgba(245,158,11,0.1);color:#F59E0B">Inventory</span>
+    </div>
+    <div class="card-cta">
+      <span class="demo-type type-full">Full Demo</span>
+      <span class="cta-link">Open demo →</span>
+    </div>
+  </a>
+
+  <a href="library-system.html" class="demo-card acc-brown">
+    <div class="card-icon">📚</div>
+    <div class="card-title">Library Management System</div>
+    <div class="card-desc">Full library system — catalogue browsing, member registration, book borrowing and returns, overdue tracking with auto-calculated fines (KES 20/day), and reports.</div>
+    <div class="card-tags">
+      <span class="tag" style="background:rgba(180,83,9,0.12);color:#FDE68A">Java</span>
+      <span class="tag" style="background:rgba(180,83,9,0.12);color:#FDE68A">MySQL</span>
+      <span class="tag" style="background:rgba(180,83,9,0.12);color:#FDE68A">Fines</span>
+    </div>
+    <div class="card-cta">
+      <span class="demo-type type-full">Full Demo</span>
+      <span class="cta-link">Open demo →</span>
+    </div>
+  </a>
+
+  <a href="vehicle-management.html" class="demo-card acc-teal">
+    <div class="card-icon">🚗</div>
+    <div class="card-title">Vehicle Management System</div>
+    <div class="card-desc">Fleet management with service scheduling — register vehicles and owners, log maintenance records, track insurance and inspection expiry, and generate compliance reports.</div>
+    <div class="card-tags">
+      <span class="tag" style="background:rgba(6,182,212,0.1);color:#06B6D4">Java</span>
+      <span class="tag" style="background:rgba(6,182,212,0.1);color:#06B6D4">MySQL</span>
+      <span class="tag" style="background:rgba(6,182,212,0.1);color:#06B6D4">Fleet</span>
+    </div>
+    <div class="card-cta">
+      <span class="demo-type type-full">Full Demo</span>
+      <span class="cta-link">Open demo →</span>
+    </div>
+  </a>
+
+  <a href="bonga-points.html" class="demo-card acc-orange">
+    <div class="card-icon">🎁</div>
+    <div class="card-title">Bonga Points Reward System</div>
+    <div class="card-desc">Loyalty programme platform — enroll members, award points per transaction using configurable rates, redeem from a reward catalogue, and track tier progression.</div>
+    <div class="card-tags">
+      <span class="tag" style="background:rgba(234,88,12,0.1);color:#FDBA74">Java</span>
+      <span class="tag" style="background:rgba(234,88,12,0.1);color:#FDBA74">MySQL</span>
+      <span class="tag" style="background:rgba(234,88,12,0.1);color:#FDBA74">Loyalty</span>
+    </div>
+    <div class="card-cta">
+      <span class="demo-type type-full">Full Demo</span>
+      <span class="cta-link">Open demo →</span>
+    </div>
+  </a>
+
+  <a href="polymarket-trader.html" class="demo-card acc-indigo">
+    <div class="card-icon">💹</div>
+    <div class="card-title">Polymarket Trader</div>
+    <div class="card-desc">Read-only deep-dive into an automated prediction market trading bot — architecture diagram, algorithm walkthrough with code, live signal simulator, and P&L backtest chart.</div>
+    <div class="card-tags">
+      <span class="tag" style="background:rgba(99,102,241,0.1);color:#818CF8">Python</span>
+      <span class="tag" style="background:rgba(99,102,241,0.1);color:#818CF8">Kelly Criterion</span>
+      <span class="tag" style="background:rgba(99,102,241,0.1);color:#818CF8">Trading Bot</span>
+    </div>
+    <div class="card-cta">
+      <span class="demo-type type-read">Explainer</span>
+      <span class="cta-link">Open explainer →</span>
+    </div>
+  </a>
+
+</div>
+
+<footer>dylan.njangiru · nairobi, kenya · all demos run client-side · no data leaves your browser</footer>
+</body>
+</html>
